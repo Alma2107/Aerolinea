@@ -1,6 +1,6 @@
 <?php
 session_start();
-if($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $_SESSION['id_asiento'] = $_POST['id_asiento'];
 }
 $cantidad = $_SESSION['pasajeros'] ?? 1;
@@ -11,16 +11,23 @@ include_once '../../includes/header.php';
         <div class="main-content">
             <h2>Información de los Pasajeros</h2>
             <?php for($i = 1; $i <= $cantidad; $i++): ?>
-                <div class="card">
+                <div class="card" style="border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 6px;">
                     <h3>Pasajero #<?=$i?></h3>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;">
                         <input type="text" name="pasajero[<?=$i?>][nombre]" placeholder="Nombre" required style="padding:8px;">
                         <input type="text" name="pasajero[<?=$i?>][apellido]" placeholder="Apellido" required style="padding:8px;">
-                        <input type="text" name="pasajero[<?=$i?>][doc]" placeholder="Documento" required style="padding:8px;">
-                        <input type="date" name="pasajero[<?=$i?>][fnac]" required style="padding:8px;">
+                        <select name="pasajero[<?=$i?>][tipo_doc]" required style="padding:8px;">
+                            <option value="DNI">DNI</option>
+                            <option value="Pasaporte">Pasaporte</option>
+                        </select>
+                        <input type="text" name="pasajero[<?=$i?>][doc]" placeholder="Número de Documento" required style="padding:8px;">
+                        <label style="font-size: 12px; color:#555;">Fecha de Nacimiento:
+                            <input type="date" name="pasajero[<?=$i?>][fnac]" required style="padding:8px; width:100%;">
+                        </label>
                     </div>
-                    <div style="margin-top:10px;">
-                        <label><input type="checkbox" name="pasajero[<?=$i?>][asistencia]" value="1"> Requiere asistencia especial</label>
+                    <div style="margin-top:15px;">
+                        <label><input type="checkbox" name="pasajero[<?=$i?>][asistencia]" value="1"> Requiere asistencia especial o posee condiciones médicas</label>
+                        <textarea name="pasajero[<?=$i?>][detalles_medicos]" placeholder="Silla de ruedas, alergias graves, etc..." style="width:100%; margin-top:5px; padding:5px; height:50px; resize:none;"></textarea>
                     </div>
                 </div>
             <?php endfor; ?>
