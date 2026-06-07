@@ -5,7 +5,6 @@ session_start();
 try {
     $pdo->beginTransaction();
 
-    // ID de cliente default si no inició sesión, o el real
     $id_cliente = $_SESSION['usuario_id'] ?? 1;
 
     // 1. Crear Orden de compra
