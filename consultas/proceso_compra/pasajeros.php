@@ -17,9 +17,9 @@ $stmtP->execute([$_SESSION['id_plan']]);
 $plan_sel = $stmtP->fetch(PDO::FETCH_ASSOC);
 
 // Calculamos el subtotal base (Vuelo + Plan) multiplicado por los pasajeros
-$total_acumulado = ($vuelo_sel['precio_base_vuelo'] + $plan_sel['cargo_extra_plan']) * $_SESSION['pasajeros'];
-
 $cantidad = $_SESSION['pasajeros'] ?? 1;
+$total_acumulado = ($vuelo_sel['precio_base_vuelo'] + $plan_sel['cargo_extra_plan']) * $cantidad;
+
 include_once '../../includes/header.php';
 ?>
 <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; max-width: 1200px; margin: 20px auto; padding: 0 20px;">
@@ -74,24 +74,37 @@ include_once '../../includes/header.php';
             ?>
         </ul>
         
-        <?php 
-        // Sumar Equipajes al total acumulado
-        if(!empty($_SESSION['equipajes'])) {
-            foreach($_SESSION['equipajes'] as $id => $cant) {
-                $stmtE = $pdo->prepare("SELECT precio_unitario FROM tipos_equipaje WHERE id_tipo_equipaje = ?");
-                $stmtE->execute([$id]); 
-                $total_acumulado += ($stmtE->fetchColumn() * $cant);
-            }
-        }
-        // Sumar Servicios al total acumulado
-        if(!empty($_SESSION['servicios'])) {
-            foreach($_SESSION['servicios'] as $id_serv) {
-                $stmtS = $pdo->prepare("SELECT precio_servicio FROM servicios_adicionales WHERE id_servicio = ?");
-                $stmtS->execute([$id_serv]); 
-                $total_acumulado += $stmtS->fetchColumn();
-            }
-        }
-        ?>
+        <?php if(!empty($_SESSION['equipajes'])): ?>
+            <p style="margin-bottom:2px; font-weight:bold; margin-top:10px;">Equipaje Extra:</p>
+            <ul style="margin:0; padding-left:20px; font-size:13px; color:#444;">
+                <?php foreach($_SESSION['equipajes'] as $num_p => $items): ?>
+                    <?php foreach($items as $id => $cant): 
+                        $stmtE = $pdo->prepare("SELECT nombre_tipo, precio_unitario FROM tipos_equipaje WHERE id_tipo_equipaje = ?");
+                        $stmtE->execute([$id]);
+                        $eq = $stmtE->fetch(PDO::FETCH_ASSOC);
+                        $total_acumulado += ($eq['precio_unitario'] * $cant);
+                    ?>
+                        <li>Pasajero #<?=$num_p?>: <?=$eq['nombre_tipo']?> (x<?=$cant?>) +$<?=number_format(($eq['precio_unitario'] * $cant), 2)?></li>
+                    <?php endforeach; ?>
+                <?php endforeach; ?>
+            </ul>
+        <?php endif; ?>
+
+        <?php if(!empty($_SESSION['servicios'])): ?>
+            <p style="margin-bottom:2px; font-weight:bold; margin-top:10px;">Servicios adicionales:</p>
+            <ul style="margin:0; padding-left:20px; font-size:13px; color:#444;">
+                <?php foreach($_SESSION['servicios'] as $num_p => $servicios_p): ?>
+                    <?php foreach($servicios_p as $id_serv): 
+                        $stmtS = $pdo->prepare("SELECT nombre_servicio, precio_servicio FROM servicios_adicionales WHERE id_servicio = ?");
+                        $stmtS->execute([$id_serv]);
+                        $srv = $stmtS->fetch();
+                        $total_acumulado += $srv['precio_servicio'];
+                    ?>
+                        <li>Pasajero #<?=$num_p?>: <?=$srv['nombre_servicio']?> +$<?=number_format($srv['precio_servicio'], 2)?></li>
+                    <?php endforeach; ?>
+                <?php endforeach; ?>
+            </ul>
+        <?php endif; ?>
         
         <hr style="border:0; border-top:1px dashed #ccc; margin-top:15px;">
         <h4 style="margin:10px 0; display:flex; justify-content:space-between;">

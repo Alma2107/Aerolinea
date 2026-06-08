@@ -2,9 +2,8 @@
 require_once '../../config/conexion.php';
 session_start();
 
-// VALIDACIÓN DE SEGURIDAD: Si no hay datos en la sesión, significa que la compra ya se procesó o expiró
+// VALIDACIÓN DE SEGURIDAD
 if (!isset($_SESSION['id_vuelo']) || !isset($_SESSION['id_plan']) || empty($_SESSION['datos_pasajeros'])) {
-    // Redirigimos al index o a una página de historial para que no explote con Warnings
     header("Location: ../../index.php");
     exit();
 }
@@ -26,59 +25,52 @@ try {
     $stmtP->execute([$id_plan]); 
     $precio_plan = $stmtP->fetchColumn();
 
-    // 2. Calcular Costos Totales de Equipajes desde la Sesión
-    $total_equipajes = 0; 
-    $lista_equipajes = [];
+    // 2. Calcular e identificar costos totales combinados para el monto global de la orden
+    $total_equipajes_global = 0; 
     if (!empty($_SESSION['equipajes'])) {
-        foreach ($_SESSION['equipajes'] as $id_tipo => $cantidad) {
-            $stmtE = $pdo->prepare("SELECT precio_unitario FROM tipos_equipaje WHERE id_tipo_equipaje = ?");
-            $stmtE->execute([$id_tipo]); 
-            $precio_u = $stmtE->fetchColumn();
-            $total_equipajes += ($precio_u * $cantidad);
-            $lista_equipajes[] = ['id_tipo' => $id_tipo, 'cantidad' => $cantidad, 'precio' => $precio_u];
+        foreach ($_SESSION['equipajes'] as $num_p => $items) {
+            foreach ($items as $id_tipo => $cantidad) {
+                $stmtE = $pdo->prepare("SELECT precio_unitario FROM tipos_equipaje WHERE id_tipo_equipaje = ?");
+                $stmtE->execute([$id_tipo]); 
+                $total_equipajes_global += ($stmtE->fetchColumn() * $cantidad);
+            }
         }
     }
 
-    // 3. Calcular Costos Totales de Servicios desde la Sesión
-    $total_servicios = 0; 
-    $lista_servicios = [];
+    $total_servicios_global = 0; 
     if (!empty($_SESSION['servicios'])) {
-        foreach ($_SESSION['servicios'] as $id_serv) {
-            $stmtS = $pdo->prepare("SELECT precio_servicio FROM servicios_adicionales WHERE id_servicio = ?");
-            $stmtS->execute([$id_serv]); 
-            $precio_s = $stmtS->fetchColumn();
-            $total_servicios += $precio_s;
-            $lista_servicios[] = ['id_servicio' => $id_serv, 'precio' => $precio_s];
+        foreach ($_SESSION['servicios'] as $num_p => $servicios_p) {
+            foreach ($servicios_p as $id_serv) {
+                $stmtS = $pdo->prepare("SELECT precio_servicio FROM servicios_adicionales WHERE id_servicio = ?");
+                $stmtS->execute([$id_serv]); 
+                $total_servicios_global += $stmtS->fetchColumn();
+            }
         }
     }
 
-    // 4. Calcular el Costo Total de todos los Asientos de los Pasajeros
-    $total_asientos = 0;
+    $total_asientos_global = 0;
     if (!empty($_SESSION['id_asiento'])) {
         foreach ($_SESSION['id_asiento'] as $id_asiento_sel) {
             $stmtA = $pdo->prepare("SELECT cargo_extra FROM asientos_avion WHERE id_asiento_avion = ?");
             $stmtA->execute([$id_asiento_sel]);
-            $total_asientos += ($stmtA->fetchColumn() ?: 0.00);
+            $total_asientos_global += ($stmtA->fetchColumn() ?: 0.00);
         }
     }
 
-    // Ahora estamos 100% seguros de que es un array contable
     $cant_pasajeros = count($_SESSION['datos_pasajeros']);
-    
-    // El monto total combina el (Vuelo + Plan) x Pasajeros + Asientos individuales + Equipajes + Servicios
-    $monto_total_orden = (($precio_vuelo + $precio_plan) * $cant_pasajeros) + $total_asientos + $total_equipajes + $total_servicios;
+    $monto_total_orden = (($precio_vuelo + $precio_plan) * $cant_pasajeros) + $total_asientos_global + $total_equipajes_global + $total_servicios_global;
 
-    // 5. Guardar Orden Maestra de Compra
+    // 3. Guardar Orden Maestra de Compra
     $stmtOrden = $pdo->prepare("INSERT INTO compras_ordenes (id_cliente, fecha_compra, monto_total_pagado, id_metodo_pago) VALUES (:cl, NOW(), :total, :metodo)");
     $stmtOrden->execute(['cl' => $id_cliente, 'total' => $monto_total_orden, 'metodo' => $id_metodo_pago]);
     $id_orden = $pdo->lastInsertId();
 
     $pnr = substr(str_shuffle("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"), 0, 6);
 
-    // 6. Procesar cada Pasajero y vincular su asiento individual
+    // 4. Procesar cada Pasajero y vincular sus compras independientes
     foreach($_SESSION['datos_pasajeros'] as $index => $pas) {
         
-        // Insertar o verificar Pasajero
+        // Insertar o verificar Pasajero en la BD
         $stmtPas = $pdo->prepare("INSERT INTO pasajeros (tipo_documento, numero_documento, nombre, apellido, fecha_nacimiento, asistencia_especial, detalles_medicos) 
             VALUES (:tipo_doc, :doc, :nom, :ape, :fnac, :asist, :detalles) ON DUPLICATE KEY UPDATE id_pasajero=LAST_INSERT_ID(id_pasajero)");
         $stmtPas->execute([
@@ -92,10 +84,8 @@ try {
         ]);
         $id_pasajero = $pdo->lastInsertId();
 
-        // Extraemos el ID del asiento correspondiente a ESTE pasajero usando el $index del bucle
+        // Extraer el Asiento correspondiente a ESTE pasajero específico ($index)
         $id_asiento_pasajero = $_SESSION['id_asiento'][$index] ?? null;
-
-        // Buscamos si ese asiento tiene cargo extra para sumarlo al precio de este ticket individual
         $precio_asiento_individual = 0;
         if ($id_asiento_pasajero) {
             $stmtAsiPrecio = $pdo->prepare("SELECT cargo_extra FROM asientos_avion WHERE id_asiento_avion = ?");
@@ -105,7 +95,7 @@ try {
 
         $precio_por_ticket_individual = $precio_vuelo + $precio_plan + $precio_asiento_individual;
         
-        // Guardar Ticket Detalle con su respectivo asiento asignado
+        // Guardar Ticket Detalle individual
         $stmtTicket = $pdo->prepare("INSERT INTO tickets_detalle (id_orden, id_vuelo, id_pasajero, id_asiento_avion, id_plan, codigo_reserva_pnr, precio_tramo_pagado) 
             VALUES (:id_orden, :id_vuelo, :id_pasajero, :id_asiento, :id_plan, :pnr, :precio_tramo)");
         $stmtTicket->execute([
@@ -119,22 +109,34 @@ try {
         ]);
         $id_ticket = $pdo->lastInsertId();
 
-        // Guardar Equipajes Asociados a este ticket
-        foreach($lista_equipajes as $eq) {
-            $stmtEqIns = $pdo->prepare("INSERT INTO ticket_equipajes (id_ticket, id_tipo_equipaje, cantidad, precio_pagado) VALUES (?, ?, ?, ?)");
-            $stmtEqIns->execute([$id_ticket, $eq['id_tipo'], $eq['cantidad'], ($eq['precio'] * $eq['cantidad'])]);
+        // 5. Guardar Equipajes EXCLUSIVOS de este pasajero
+        if (!empty($_SESSION['equipajes'][$index])) {
+            foreach($_SESSION['equipajes'][$index] as $id_tipo => $cantidad) {
+                $stmtE = $pdo->prepare("SELECT precio_unitario FROM tipos_equipaje WHERE id_tipo_equipaje = ?");
+                $stmtE->execute([$id_tipo]);
+                $precio_u = $stmtE->fetchColumn();
+
+                $stmtEqIns = $pdo->prepare("INSERT INTO ticket_equipajes (id_ticket, id_tipo_equipaje, cantidad, precio_pagado) VALUES (?, ?, ?, ?)");
+                $stmtEqIns->execute([$id_ticket, $id_tipo, $cantidad, ($precio_u * $cantidad)]);
+            }
         }
 
-        // Guardar Servicios Asociados a este ticket
-        foreach($lista_servicios as $srv) {
-            $stmtSrvIns = $pdo->prepare("INSERT INTO ticket_servicios (id_ticket, id_servicio, precio_servicio_pagado) VALUES (?, ?, ?)");
-            $stmtSrvIns->execute([$id_ticket, $srv['id_servicio'], $srv['precio']]);
+        // 6. Guardar Servicios EXCLUSIVOS de este pasajero
+        if (!empty($_SESSION['servicios'][$index])) {
+            foreach($_SESSION['servicios'][$index] as $id_serv) {
+                $stmtS = $pdo->prepare("SELECT precio_servicio FROM servicios_adicionales WHERE id_servicio = ?");
+                $stmtS->execute([$id_serv]);
+                $precio_s = $stmtS->fetchColumn();
+
+                $stmtSrvIns = $pdo->prepare("INSERT INTO ticket_servicios (id_ticket, id_servicio, precio_servicio_pagado) VALUES (?, ?, ?)");
+                $stmtSrvIns->execute([$id_ticket, $id_serv, $precio_s]);
+            }
         }
     }
 
     $pdo->commit();
     
-    // Limpieza de datos temporales de la compra
+    // Limpieza total
     unset($_SESSION['id_vuelo'], $_SESSION['id_plan'], $_SESSION['id_asiento'], $_SESSION['datos_pasajeros'], $_SESSION['equipajes'], $_SESSION['servicios'], $_SESSION['pasajeros']);
 
     echo "<html><head><link rel='stylesheet' href='../../css/estilos.css'></head><body>";
