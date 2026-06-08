@@ -16,46 +16,61 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Controladores de respaldo primarios (Detección de tramo inicial)
-$id_vuelo_actual = $_SESSION['id_vuelo_ida'] ?? $_SESSION['id_vuelo'] ?? 1;
-$id_plan_actual  = $_SESSION['id_plan'] ?? 1;
+// Controladores de respaldo primarios
+$id_vuelo_ida       = $_SESSION['id_vuelo_ida'] ?? 0;
+$id_vuelo_vuelta    = $_SESSION['id_vuelo_vuelta'] ?? 0;
 $cantidad_pasajeros = $_SESSION['pasajeros'] ?? 1;
+$planes_seleccionados = $_SESSION['planes_pasajeros'] ?? [];
 
-// Si no está definido el vuelo genérico de control, le asignamos el de ida
-if (!isset($_SESSION['id_vuelo'])) {
-    $_SESSION['id_vuelo'] = $id_vuelo_actual;
-}
+// 1. Cargar catálogos completos indexados para evitar consultas redundantes en bucles
+$planes_db = $pdo->query("SELECT id_plan, nombre_plan, cargo_extra_plan FROM planes_tarifas")->fetchAll(PDO::FETCH_UNIQUE|PDO::FETCH_ASSOC);
+$equipajes_db = $pdo->query("SELECT id_tipo_equipaje, nombre_tipo, precio_unitario FROM tipos_equipaje")->fetchAll(PDO::FETCH_UNIQUE|PDO::FETCH_ASSOC);
 
-// Consultas seguras para el historial lateral
-$stmtV = $pdo->prepare("SELECT numero_vuelo, precio_base_vuelo FROM vuelos WHERE id_vuelo = ?");
-$stmtV->execute([$id_vuelo_actual]);
-$vuelo_sel = $stmtV->fetch(PDO::FETCH_ASSOC);
+// 2. Obtener datos de los vuelos para el resumen visual
+$vuelo_ida_num = "No asignado";
+$precio_ida_base = 0.00;
 
-if (!$vuelo_sel) {
-    $vuelo_sel = ['numero_vuelo' => 'No definido', 'precio_base_vuelo' => 0.00];
-}
-
-$stmtP = $pdo->prepare("SELECT nombre_plan, cargo_extra_plan FROM planes_tarifas WHERE id_plan = ?");
-$stmtP->execute([$id_plan_actual]);
-$plan_sel = $stmtP->fetch(PDO::FETCH_ASSOC);
-
-if (!$plan_sel) {
-    $plan_sel = ['nombre_plan' => 'Estándar', 'cargo_extra_plan' => 0.00];
-}
-
-// Suma base de vuelos y planes contratados en la primera pantalla
-$total_acumulado = ((float)$vuelo_sel['precio_base_vuelo'] + (float)$plan_sel['cargo_extra_plan']) * $cantidad_pasajeros;
-
-// Si existe vuelo de vuelta, sumamos su base al total inicial
-if (!empty($_SESSION['id_vuelo_vuelta']) && $_SESSION['id_vuelo_vuelta'] > 0) {
-    $stmtVV = $pdo->prepare("SELECT precio_base_vuelo FROM vuelos WHERE id_vuelo = ?");
-    $stmtVV->execute([$_SESSION['id_vuelo_vuelta']]);
-    $vuelo_vuelta = $stmtVV->fetch(PDO::FETCH_ASSOC);
-    if ($vuelo_vuelta) {
-        $total_acumulado += ((float)$vuelo_vuelta['precio_base_vuelo'] * $cantidad_pasajeros);
+if ($id_vuelo_ida > 0) {
+    $stmtV = $pdo->prepare("SELECT numero_vuelo, precio_base_vuelo FROM vuelos WHERE id_vuelo = ?");
+    $stmtV->execute([$id_vuelo_ida]);
+    $vuelo_sel = $stmtV->fetch(PDO::FETCH_ASSOC);
+    if ($vuelo_sel) {
+        $vuelo_ida_num = $vuelo_sel['numero_vuelo'];
+        $precio_ida_base = (float)$vuelo_sel['precio_base_vuelo'];
     }
 }
 
+$vuelo_vuelta_num = "";
+$precio_vuelta_base = 0.00;
+
+if ($id_vuelo_vuelta > 0) {
+    $stmtVV = $pdo->prepare("SELECT numero_vuelo, precio_base_vuelo FROM vuelos WHERE id_vuelo = ?");
+    $stmtVV->execute([$id_vuelo_vuelta]);
+    $vuelo_v_data = $stmtVV->fetch(PDO::FETCH_ASSOC);
+    if ($vuelo_v_data) {
+        $vuelo_vuelta_num = $vuelo_v_data['numero_vuelo'];
+        $precio_vuelta_base = (float)$vuelo_v_data['precio_base_vuelo'];
+    }
+}
+
+// 3. RECALCULAR TOTAL ACUMULADO EXACTO (Vuelos + Planes personalizados)
+$total_acumulado = 0;
+for ($i = 1; $i <= $cantidad_pasajeros; $i++) {
+    $total_acumulado += $precio_ida_base;
+    $total_acumulado += $precio_vuelta_base;
+
+    if ($id_vuelo_ida > 0 && isset($planes_seleccionados[$i]['ida'])) {
+        $id_p_ida = $planes_seleccionados[$i]['ida'];
+        $total_acumulado += (float)($planes_db[$id_p_ida]['cargo_extra_plan'] ?? 0);
+    }
+
+    if ($id_vuelo_vuelta > 0 && isset($planes_seleccionados[$i]['vuelta'])) {
+        $id_p_vta = $planes_seleccionados[$i]['vuelta'];
+        $total_acumulado += (float)($planes_db[$id_p_vta]['cargo_extra_plan'] ?? 0);
+    }
+}
+
+// Obtener catálogo de servicios para renderizar las opciones del formulario
 $servicios = $pdo->query("SELECT id_servicio, nombre_servicio, descripcion, precio_servicio FROM servicios_adicionales")->fetchAll(PDO::FETCH_ASSOC);
 include_once '../../includes/header.php';
 ?>
@@ -92,8 +107,10 @@ include_once '../../includes/header.php';
 
     <div class="sidebar-resumen">
         <h3>Resumen de tu Viaje</h3>
-        <p><strong>Vuelo principal:</strong> <?=$vuelo_sel['numero_vuelo']?></p>
-        <p><strong>Tarifa base:</strong> <?=$plan_sel['nombre_plan']?></p>
+        <p><strong>Vuelo Ida:</strong> <?=$vuelo_ida_num?></p>
+        <?php if ($vuelo_vuelta_num !== ""): ?>
+            <p><strong>Vuelo Vuelta:</strong> <?=$vuelo_vuelta_num?></p>
+        <?php endif; ?>
         <p><strong>Pasajeros:</strong> x<?=$cantidad_pasajeros?></p>
         
         <?php 
@@ -104,11 +121,10 @@ include_once '../../includes/header.php';
             <ul class="lista-resumen lista-equipaje-resumen">
                 <?php foreach($_SESSION['equipajes'] as $num_p => $items): ?>
                     <?php foreach($items as $id => $cant): 
-                        $stmtE = $pdo->prepare("SELECT nombre_tipo, precio_unitario FROM tipos_equipaje WHERE id_tipo_equipaje = ?");
-                        $stmtE->execute([$id]);
-                        $eq = $stmtE->fetch(PDO::FETCH_ASSOC);
-                        
+                        // Acceso veloz en memoria simulando la estructura limpia de la Base de Datos
+                        $eq = $equipajes_db[$id] ?? null;
                         if(!$eq) continue;
+                        
                         $monto_equipaje = ((float)$eq['precio_unitario'] * (int)$cant);
                         $subtotal_equipajes += $monto_equipaje;
                     ?>

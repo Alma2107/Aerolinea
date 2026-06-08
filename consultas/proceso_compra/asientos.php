@@ -2,26 +2,45 @@
 require_once '../../config/conexion.php';
 session_start();
 
-// Guardar los servicios de la pantalla anterior en la sesión
+// 1. GUARDAR LOS SERVICIOS ADICIONALES EN LA SESIÓN (Vienen de servicios.php)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['servicios'])) {
     $_SESSION['servicios'] = $_POST['servicios'];
 }
 
-// 1. CONTROL DE TRAMOS (Ida o Vuelta)
-$tramo_actual = $_GET['tramo'] ?? 'ida'; 
+// Variables de control de tramos blindadas
+$id_vuelo_ida_global = isset($_SESSION['id_vuelo_ida']) ? (int)$_SESSION['id_vuelo_ida'] : 0;
+$id_vuelo_vta_global = isset($_SESSION['id_vuelo_vuelta']) ? (int)$_SESSION['id_vuelo_vuelta'] : 0;
 
-if ($tramo_actual === 'vuelta' && isset($_SESSION['id_vuelo_vuelta'])) {
-    $id_vuelo_actual = (int)$_SESSION['id_vuelo_vuelta'];
+// DETERMINAR EL TRAMO REAL ACTIVO
+$tramo_solicitado = $_GET['tramo'] ?? 'ida';
+
+// Si no hay vuelo de ida, el tramo por obligación tiene que ser vuelta
+if ($id_vuelo_ida_global === 0) {
+    $tramo_actual = 'vuelta';
+} else {
+    $tramo_actual = $tramo_solicitado;
+}
+
+// Asignar el ID del vuelo correspondiente al tramo actual
+if ($tramo_actual === 'vuelta' && $id_vuelo_vta_global > 0) {
+    $id_vuelo_actual = $id_vuelo_vta_global;
     $titulo_tramo = "Vuelo de Regreso / Vuelta";
 } else {
-    $id_vuelo_actual = (int)($_SESSION['id_vuelo_ida'] ?? $_SESSION['id_vuelo'] ?? 1);
+    $id_vuelo_actual = $id_vuelo_ida_global;
     $titulo_tramo = "Vuelo de Ida";
 }
 
-$id_plan_actual     = $_SESSION['id_plan'] ?? 1;
-$cantidad_pasajeros = $_SESSION['pasajeros'] ?? 1;
+// Si ocurre un error raro y no hay vuelos cargados, evitar errores fatales
+if ($id_vuelo_actual === 0) {
+    header("Location: ../../index.php");
+    exit();
+}
 
-// 2. Consultar datos del vuelo y el avión asignado
+$cantidad_pasajeros   = $_SESSION['pasajeros'] ?? 1;
+$planes_seleccionados = $_SESSION['planes_pasajeros'] ?? [];
+$equipajes_sesion     = $_SESSION['equipajes'] ?? [];
+
+// 3. CONSULTAR DATOS DEL VUELO Y AVIÓN
 $stmtV = $pdo->prepare("
     SELECT v.numero_vuelo, v.precio_base_vuelo, a.id_avion, a.capacidad, a.modelo 
     FROM vuelos v
@@ -35,7 +54,7 @@ if (!$vuelo_sel) {
     $vuelo_sel = ['numero_vuelo' => 'No definido', 'precio_base_vuelo' => 0.00, 'capacidad' => 180, 'modelo' => 'Airbus A320'];
 }
 
-// 3. CONFIGURACIÓN DINÁMICA DE CABINA (Camaleón)
+// 4. CONFIGURACIÓN DINÁMICA DE CABINA
 $capacidad_avion = (int)$vuelo_sel['capacidad'];
 
 if ($capacidad_avion <= 120) {
@@ -51,18 +70,57 @@ if ($capacidad_avion <= 120) {
 }
 $total_filas = (int)ceil($capacidad_avion / $asientos_por_fila);
 
-// 4. Consultar asientos ocupados en ESTE vuelo específico
+// 5. CONSULTAR ASIENTOS OCUPADOS EN ESTE VUELO
 $stmtOcupados = $pdo->prepare("SELECT numero_asiento FROM tickets_detalle WHERE id_vuelo = ? AND numero_asiento IS NOT NULL");
 $stmtOcupados->execute([$id_vuelo_actual]);
 $asientos_ocupados = $stmtOcupados->fetchAll(PDO::FETCH_COLUMN);
 
-// 5. Calcular totales base de la sesión (Vuelos + Planes + Equipajes)
-$total_acumulado = ((float)$vuelo_sel['precio_base_vuelo'] + (float)($_SESSION['cargo_extra_plan'] ?? 0)) * $cantidad_pasajeros;
+
+// --- 6. RECALCULO DE PRECIO EXACTO HASTA EL MOMENTO ---
+$planes_db = $pdo->query("SELECT id_plan, cargo_extra_plan FROM planes_tarifas")->fetchAll(PDO::FETCH_UNIQUE|PDO::FETCH_ASSOC);
+$equipajes_db = $pdo->query("SELECT id_tipo_equipaje, precio_unitario FROM tipos_equipaje")->fetchAll(PDO::FETCH_UNIQUE|PDO::FETCH_ASSOC);
+
+$precio_ida_base = 0.00;
+if ($id_vuelo_ida_global > 0) {
+    $stmtI = $pdo->prepare("SELECT precio_base_vuelo FROM vuelos WHERE id_vuelo = ?");
+    $stmtI->execute([$id_vuelo_ida_global]);
+    $precio_ida_base = (float)($stmtI->fetchColumn() ?: 0.00);
+}
+
+$precio_vuelta_base = 0.00;
+if ($id_vuelo_vta_global > 0) {
+    $stmtR = $pdo->prepare("SELECT precio_base_vuelo FROM vuelos WHERE id_vuelo = ?");
+    $stmtR->execute([$id_vuelo_vta_global]);
+    $precio_vuelta_base = (float)($stmtR->fetchColumn() ?: 0.00);
+}
+
+$total_acumulado = 0;
+
+for ($i = 1; $i <= $cantidad_pasajeros; $i++) {
+    $total_acumulado += $precio_ida_base;
+    $total_acumulado += $precio_vuelta_base;
+
+    if ($id_vuelo_ida_global > 0 && isset($planes_seleccionados[$i]['ida'])) {
+        $id_p_ida = $planes_seleccionados[$i]['ida'];
+        $total_acumulado += (float)($planes_db[$id_p_ida]['cargo_extra_plan'] ?? 0);
+    }
+    if ($id_vuelo_vta_global > 0 && isset($planes_seleccionados[$i]['vuelta'])) {
+        $id_p_vta = $planes_seleccionados[$i]['vuelta'];
+        $total_acumulado += (float)($planes_db[$id_p_vta]['cargo_extra_plan'] ?? 0);
+    }
+
+    if (isset($equipajes_sesion[$i])) {
+        foreach ($equipajes_sesion[$i] as $id_tipo => $cant) {
+            $precio_eq = (float)($equipajes_db[$id_tipo]['precio_unitario'] ?? 0);
+            $total_acumulado += ($precio_eq * (int)$cant);
+        }
+    }
+}
 
 include_once '../../includes/header.php';
 ?>
 
-<link rel="stylesheet" href="css/procesar_compra/asientos.css">
+<link class="dinamico-css" rel="stylesheet" href="css/proceso_compra/asientos.css">
 
 <div class="contenedor-asientos">
     
@@ -95,7 +153,6 @@ include_once '../../includes/header.php';
                     <?php 
                     for ($fila = 1; $fila <= $total_filas; $fila++): 
                         
-                        // --- REGLAS DE CATEGORÍAS ---
                         if ($fila == 1) {
                             $categoria = "Front Row"; $cargo_extra = 5000.00;
                             echo '<div class="separador-categoria sep-front">Front Row (+$5,000.00)</div>';
@@ -113,16 +170,13 @@ include_once '../../includes/header.php';
                             if ($fila == 8) echo '<div class="separador-categoria sep-estandar">Económico / Estándar</div>';
                         }
 
-                        // --- LADO IZQUIERDO DINÁMICO ---
                         foreach($lado_izquierdo as $letra) {
                             $nombre_asiento = $fila . $letra;
                             imprimirAsientoAutomatico($nombre_asiento, $categoria, $cargo_extra, $asientos_ocupados);
                         }
 
-                        // --- PASILLO ---
                         echo '<div class="numero-fila">' . $fila . '</div>';
 
-                        // --- LADO DERECHO DINÁMICO ---
                         foreach($lado_derecho as $letra) {
                             $nombre_asiento = $fila . $letra;
                             imprimirAsientoAutomatico($nombre_asiento, $categoria, $cargo_extra, $asientos_ocupados);
@@ -140,17 +194,19 @@ include_once '../../includes/header.php';
         </div>
 
         <button type="submit" class="btn-continuar">
-            <?= ($tramo_actual === 'ida' && isset($_SESSION['id_vuelo_vuelta']) && $_SESSION['id_vuelo_vuelta'] > 0) ? 'Siguiente: Elegir Asientos de Vuelta ➡️' : 'Continuar a Datos de Pasajeros ➡️' ?>
+            <?= ($tramo_actual === 'ida' && $id_vuelo_vta_global > 0) ? 'Siguiente: Elegir Asientos de Vuelta ➡️' : 'Continuar a Datos de Pasajeros ➡️' ?>
         </button>
     </form>
 
     <div class="sidebar-resumen">
         <h3>Resumen de tu Viaje</h3>
-        <p><strong>Tramo actual:</strong> <span class="destacado"><?=$tramo_actual?></span></p>
+        <p><strong>Tramo actual:</strong> <span class="destacado" style="text-transform: uppercase; color: #d9534f;"><?=$tramo_actual?></span></p>
         <p><strong>Vuelo:</strong> <?=$vuelo_sel['numero_vuelo']?></p>
         <p><strong>Pasajeros:</strong> x<?=$cantidad_pasajeros?></p>
         <p><strong>Asientos tramo actual:</strong> <span id="asientos-lista" style="font-weight:bold; color:#0056b3;">Ninguno</span></p>
         
+        <div id="contenedor-asientos-dinamicos-detalle"></div>
+
         <hr class="separador">
         <h4 class="total-contenedor">
             <span>Total Acumulado:</span>
@@ -163,7 +219,6 @@ include_once '../../includes/header.php';
 function imprimirAsientoAutomatico($numero_asiento, $categoria, $cargo_extra, $asientos_ocupados) {
     $esta_ocupado = in_array($numero_asiento, $asientos_ocupados);
 
-    // Mapeo de clases CSS de acuerdo a la categoría
     $clase_categoria = "asiento-cat-estandar";
     if (!$esta_ocupado) {
         switch ($categoria) {
@@ -180,9 +235,9 @@ function imprimirAsientoAutomatico($numero_asiento, $categoria, $cargo_extra, $a
     $letra_visual = $matches[1] ?? $numero_asiento;
     ?>
     <label class="asiento-box <?= $clase_categoria ?> <?= $clase_estado ?>" 
-           data-cargo="<?=$cargo_extra?>" 
-           data-asiento="<?=$numero_asiento?>"
-           title="<?=$categoria?> - Asiento <?=$numero_asiento?>">
+            data-cargo="<?=$cargo_extra?>" 
+            data-asiento="<?=$numero_asiento?>"
+            title="<?=$categoria?> - Asiento <?=$numero_asiento?>">
         
         <input type="checkbox" name="asientos_seleccionados[]" value="<?=$numero_asiento?>" <?= $esta_ocupado ? 'disabled' : '' ?> style="display:none;" class="check-asiento">
         
@@ -198,6 +253,6 @@ function imprimirAsientoAutomatico($numero_asiento, $categoria, $cargo_extra, $a
 <script>
     window.cantidadPasajeros = <?=$cantidad_pasajeros?>;
 </script>
-<script src="js/procesar_compra/asientos.js"></script>
+<script src="js/proceso_compra/asientos.js"></script>
 </body>
 </html>

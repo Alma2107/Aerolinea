@@ -12,6 +12,10 @@ if (isset($_GET['pasajeros'])) {
 // 2. Capturar el tipo de viaje (solo_ida, solo_vuelta, ida_vuelta, multidestino)
 $tipo_viaje = $_GET['tipo_viaje'] ?? 'ida_vuelta';
 
+// 3. Capturar origen y destino del buscador (Ej: 'AEP', 'BRC')
+$origen  = $_GET['origen'] ?? '';
+$destino = $_GET['destino'] ?? '';
+
 // Limpieza de datos de compras anteriores para evitar arrastrar configuraciones viejas
 unset(
     $_SESSION['id_vuelo_ida'], 
@@ -23,8 +27,25 @@ unset(
     $_SESSION['datos_pasajeros']
 );
 
-// Traer vuelos disponibles
-$vuelos = $pdo->query("SELECT id_vuelo, numero_vuelo, fecha_salida, precio_base_vuelo FROM vuelos WHERE estado_vuelo = 'Programado'")->fetchAll(PDO::FETCH_ASSOC);
+// --- CONSULTAS CORREGIDAS Y FILTRADAS SEGÚN LA BASE DE DATOS ---
+
+// Vuelos de Ida: Filtramos donde coincida origen, destino y esté Programado
+$stmtIda = $pdo->prepare("SELECT id_vuelo, numero_vuelo, fecha_salida, precio_base_vuelo 
+                          FROM vuelos 
+                          WHERE origen_iata = :origen AND destino_iata = :destino AND estado_vuelo = 'Programado'");
+$stmtIda->execute(['origen' => $origen, 'destino' => $destino]);
+$vuelos_ida = $stmtIda->fetchAll(PDO::FETCH_ASSOC);
+
+// Vuelos de Vuelta: Invertimos el origen y el destino para el regreso
+$vuelos_vuelta = [];
+if ($tipo_viaje !== 'solo_ida') {
+    $stmtVuelta = $pdo->prepare("SELECT id_vuelo, numero_vuelo, fecha_salida, precio_base_vuelo 
+                                 FROM vuelos 
+                                 WHERE origen_iata = :destino AND destino_iata = :origen AND estado_vuelo = 'Programado'");
+    $stmtVuelta->execute(['origen' => $origen, 'destino' => $destino]);
+    $vuelos_vuelta = $stmtVuelta->fetchAll(PDO::FETCH_ASSOC);
+}
+
 // Traer planes tarifarios disponibles
 $planes = $pdo->query("SELECT id_plan, nombre_plan, descripcion, cargo_extra_plan FROM planes_tarifas")->fetchAll(PDO::FETCH_ASSOC);
 
@@ -33,7 +54,7 @@ $cantidad_pasajeros = $_SESSION['pasajeros'];
 include_once '../../includes/header.php';
 ?>
 
-<link rel="stylesheet" href="css/estilos-vuelos.css">
+<link rel="stylesheet" href="css/proceso_compra/vuelos.css">
 
 <div class="contenedor-vuelos">
     
@@ -44,13 +65,17 @@ include_once '../../includes/header.php';
             
             <?php if ($tipo_viaje !== 'solo_vuelta'): ?>
                 <div class="bloque-vuelo">
-                    <h4>Vuelo de Ida:</h4>
-                    <?php foreach($vuelos as $index => $v): ?>
-                        <label class="opcion-vuelo">
-                            <input type="radio" name="id_vuelo_ida" value="<?=$v['id_vuelo']?>" data-precio="<?=$v['precio_base_vuelo']?>" class="selector-vuelo" <?= $index === 0 ? 'checked' : '' ?> required>
-                            <strong><?=$v['numero_vuelo']?></strong> - Salida: <?=$v['fecha_salida']?> | Base: <strong>$<?=number_format($v['precio_base_vuelo'], 2)?></strong>
-                        </label>
-                    <?php endforeach; ?>
+                    <h4>Vuelo de Ida (<?=$origen?> ➡️ <?=$destino?>):</h4>
+                    <?php if(empty($vuelos_ida)): ?>
+                        <p class="alerta-no-vuelos">No se encontraron vuelos de ida programados para esta ruta.</p>
+                    <?php else: ?>
+                        <?php foreach($vuelos_ida as $index => $v): ?>
+                            <label class="opcion-vuelo">
+                                <input type="radio" name="id_vuelo_ida" value="<?=$v['id_vuelo']?>" data-precio="<?=$v['precio_base_vuelo']?>" class="selector-vuelo" <?= $index === 0 ? 'checked' : '' ?> required>
+                                <strong><?=$v['numero_vuelo']?></strong> - Salida: <?=$v['fecha_salida']?> | Base: <strong>$<?=number_format($v['precio_base_vuelo'], 2)?></strong>
+                            </label>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
             <?php else: ?>
                 <input type="hidden" name="id_vuelo_ida" value="0" data-precio="0" class="selector-vuelo">
@@ -58,13 +83,17 @@ include_once '../../includes/header.php';
 
             <?php if ($tipo_viaje !== 'solo_ida'): ?>
                 <div class="bloque-vuelo">
-                    <h4>Vuelo de Vuelta / Regreso:</h4>
-                    <?php foreach($vuelos as $index => $v): ?>
-                        <label class="opcion-vuelo">
-                            <input type="radio" name="id_vuelo_vuelta" value="<?=$v['id_vuelo']?>" data-precio="<?=$v['precio_base_vuelo']?>" class="selector-vuelo" <?= ($index === 0) ? 'checked' : '' ?> required>
-                            <strong><?=$v['numero_vuelo']?></strong> - Regreso: <?=$v['fecha_salida']?> | Base: <strong>$<?=number_format($v['precio_base_vuelo'], 2)?></strong>
-                        </label>
-                    <?php endforeach; ?>
+                    <h4>Vuelo de Vuelta / Regreso (<?=$destino?> ➡️ <?=$origen?>):</h4>
+                    <?php if(empty($vuelos_vuelta)): ?>
+                        <p class="alerta-no-vuelos">No se encontraron vuelos de regreso programados para esta ruta.</p>
+                    <?php else: ?>
+                        <?php foreach($vuelos_vuelta as $index => $v): ?>
+                            <label class="opcion-vuelo">
+                                <input type="radio" name="id_vuelo_vuelta" value="<?=$v['id_vuelo']?>" data-precio="<?=$v['precio_base_vuelo']?>" class="selector-vuelo" <?= ($index === 0) ? 'checked' : '' ?> required>
+                                <strong><?=$v['numero_vuelo']?></strong> - Regreso: <?=$v['fecha_salida']?> | Base: <strong>$<?=number_format($v['precio_base_vuelo'], 2)?></strong>
+                            </label>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
             <?php else: ?>
                 <input type="hidden" name="id_vuelo_vuelta" value="0" data-precio="0" class="selector-vuelo">
