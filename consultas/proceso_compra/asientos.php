@@ -255,4 +255,4 @@ function imprimirAsientoAutomatico($numero_asiento, $categoria, $cargo_extra, $a
 </script>
 <script src="js/proceso_compra/asientos.js"></script>
 </body>
-</html>
+</html>{}
