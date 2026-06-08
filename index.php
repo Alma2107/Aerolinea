@@ -44,17 +44,6 @@ include_once 'includes/header.php';
                     <label><input type="radio" name="tipo_viaje" value="multidestino" id="radio-multidestino"> Multitramo</label>
                 </div>
 
-                <div class="pasajeros-selector" style="margin-bottom: 20px; font-family: 'Inter', sans-serif;">
-                    <label for="pasajeros" style="font-weight: 600; font-size: 14px; color: #333; display: block; margin-bottom: 5px;">Cantidad de Pasajeros:</label>
-                    <select name="pasajeros" id="pasajeros" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; width: 120px; background: #fff;">
-                        <option value="1" selected>1 Pasajero</option>
-                        <option value="2">2 Pasajeros</option>
-                        <option value="3">3 Pasajeros</option>
-                        <option value="4">4 Pasajeros</option>
-                        <option value="5">5 Pasajeros</option>
-                    </select>
-                </div>
-
                 <button type="button" id="btn-nuevo-tramo" class="btn-add-tramo" style="display: none;">+ Agregar tramo</button>
 
                 <div class="tramos-wrapper" id="tramos-contenedor"></div>

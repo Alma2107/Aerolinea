@@ -16,27 +16,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Consultas para el historial lateral
+// Controladores de respaldo (fallbacks) por si se pierde momentáneamente la sesión
+$id_vuelo_actual = $_SESSION['id_vuelo'] ?? 1;
+$id_plan_actual  = $_SESSION['id_plan'] ?? 1;
+
+// Consultas seguras para el historial lateral
 $stmtV = $pdo->prepare("SELECT numero_vuelo, precio_base_vuelo FROM vuelos WHERE id_vuelo = ?");
-$stmtV->execute([$_SESSION['id_vuelo']]);
+$stmtV->execute([$id_vuelo_actual]);
 $vuelo_sel = $stmtV->fetch(PDO::FETCH_ASSOC);
 
+// Si la base de datos no encuentra el vuelo, creamos datos ficticios estructurados para que no explote la pantalla
+if (!$vuelo_sel) {
+    $vuelo_sel = ['numero_vuelo' => 'No definido', 'precio_base_vuelo' => 0.00];
+}
+
 $stmtP = $pdo->prepare("SELECT nombre_plan, cargo_extra_plan FROM planes_tarifas WHERE id_plan = ?");
-$stmtP->execute([$_SESSION['id_plan']]);
+$stmtP->execute([$id_plan_actual]);
 $plan_sel = $stmtP->fetch(PDO::FETCH_ASSOC);
 
+if (!$plan_sel) {
+    $plan_sel = ['nombre_plan' => 'Estándar', 'cargo_extra_plan' => 0.00];
+}
+
 $cantidad_pasajeros = $_SESSION['pasajeros'] ?? 1;
-$total_acumulado = ($vuelo_sel['precio_base_vuelo'] + $plan_sel['cargo_extra_plan']) * $cantidad_pasajeros;
+
+// Aseguramos que los valores sean float puros antes de sumarlos matemáticamente
+$total_acumulado = ((float)$vuelo_sel['precio_base_vuelo'] + (float)$plan_sel['cargo_extra_plan']) * $cantidad_pasajeros;
 
 $servicios = $pdo->query("SELECT id_servicio, nombre_servicio, descripcion, precio_servicio FROM servicios_adicionales")->fetchAll(PDO::FETCH_ASSOC);
 include_once '../../includes/header.php';
 ?>
-<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; max-width: 1200px; margin: 20px auto; padding: 0 20px;">
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; max-width: 1200px; margin: 20px auto; padding: 0 20px; font-family: sans-serif;">
     
     <form action="asientos.php" method="POST">
         
         <?php for($i = 1; $i <= $cantidad_pasajeros; $i++): ?>
-            <div class="card" style="border: 1px solid #ddd; padding: 20px; border-radius: 8px; background:#fff; margin-bottom:20px;">
+            <div class="card" style="border: 1px solid #ddd; padding: 20px; border-radius: 8px; background:#fff; margin-bottom:20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                 <h3 style="margin-top:0; color:#0056b3;">👤 Pasajero #<?=$i?>: Servicios adicionales a bordo</h3>
                 <p style="margin-bottom:15px; color:#666; font-size:13px;">Sumá extras opcionales exclusivos para este pasajero.</p>
                 
@@ -73,7 +88,11 @@ include_once '../../includes/header.php';
                         $stmtE = $pdo->prepare("SELECT nombre_tipo, precio_unitario FROM tipos_equipaje WHERE id_tipo_equipaje = ?");
                         $stmtE->execute([$id]);
                         $eq = $stmtE->fetch(PDO::FETCH_ASSOC);
-                        $total_acumulado += ($eq['precio_unitario'] * $cant);
+                        
+                        // Si por las dudas el equipaje no existe en BD, saltamos el registro
+                        if(!$eq) continue;
+
+                        $total_acumulado += ((float)$eq['precio_unitario'] * (int)$cant);
                     ?>
                         <li>Pasajero #<?=$num_p?>: <?=$eq['nombre_tipo']?> (x<?=$cant?>) +$<?=number_format(($eq['precio_unitario'] * $cant), 2)?></li>
                     <?php endforeach; ?>
