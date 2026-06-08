@@ -4,8 +4,8 @@ require_once '../../config/conexion.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // CAPTURA NUEVA: Ahora recibimos el string del asiento desde el mapa (ej: "1A", "14B")
-    if (isset($_POST['asiento_seleccionado'])) {
-        $_SESSION['asiento_seleccionado'] = $_POST['asiento_seleccionado']; 
+    if (isset($_POST['asientos_seleccionados'])) {
+        $_SESSION['asiento_seleccionado'] = $_POST['asientos_seleccionados']; 
     }
 }
 
@@ -24,40 +24,52 @@ $total_acumulado = ((float)$vuelo_sel['precio_base_vuelo'] + (float)$plan_sel['c
 
 include_once '../../includes/header.php';
 ?>
-<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; max-width: 1200px; margin: 20px auto; padding: 0 20px; font-family: sans-serif;">
+
+<link rel="stylesheet" href="css/procesar_compra/pasajeros.css">
+
+<div class="contenedor-pasajeros">
     
     <form action="pago.php" method="POST">
-        <h2>Información de los Pasajeros</h2>
+        <h2 class="titulo-seccion">Información de los Pasajeros</h2>
+        
         <?php for($i = 1; $i <= $cantidad; $i++): ?>
-            <div class="card" style="border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 6px; background:#fff;">
+            <div class="card">
                 <h3>Pasajero #<?=$i?></h3>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;">
-                    <input type="text" name="pasajero[<?=$i?>][nombre]" placeholder="Nombre" required style="padding:8px;">
-                    <input type="text" name="pasajero[<?=$i?>][apellido]" placeholder="Apellido" required style="padding:8px;">
-                    <select name="pasajero[<?=$i?>][tipo_doc]" required style="padding:8px;">
+                
+                <div class="grid-inputs">
+                    <input type="text" name="pasajero[<?=$i?>][nombre]" placeholder="Nombre" required>
+                    <input type="text" name="pasajero[<?=$i?>][apellido]" placeholder="Apellido" required>
+                    
+                    <select name="pasajero[<?=$i?>][tipo_doc]" required>
                         <option value="DNI">DNI</option>
                         <option value="Pasaporte">Pasaporte</option>
                     </select>
-                    <input type="text" name="pasajero[<?=$i?>][doc]" placeholder="Documento" required style="padding:8px;">
-                    <input type="date" name="pasajero[<?=$i?>][fnac]" required style="padding:8px;">
+                    
+                    <input type="text" name="pasajero[<?=$i?>][doc]" placeholder="Documento" required>
+                    <input type="date" name="pasajero[<?=$i?>][fnac]" required>
                 </div>
-                <div style="margin-top:10px;">
-                    <label><input type="checkbox" name="pasajero[<?=$i?>][asistencia]" value="1"> Requiere asistencia especial</label>
-                    <textarea name="pasajero[<?=$i?>][detalles_medicos]" placeholder="Detalles médicos si requiere asistencia..." style="width:100%; margin-top:5px; height:40px; resize:none;"></textarea>
+                
+                <div class="bloque-asistencia">
+                    <label>
+                        <input type="checkbox" name="pasajero[<?=$i?>][asistencia]" value="1"> 
+                        Requiere asistencia especial
+                    </label>
+                    <textarea name="pasajero[<?=$i?>][detalles_medicos]" placeholder="Detalles médicos si requiere asistencia..."></textarea>
                 </div>
             </div>
         <?php endfor; ?>
-        <button type="submit" style="background:#0056b3; color:#fff; padding:12px 25px; border:none; border-radius:4px; cursor:pointer; font-weight:bold; margin-top:10px;">Ir al Pago</button>
+        
+        <button type="submit" class="btn-pago">Ir al Pago</button>
     </form>
 
-    <div style="border: 1px solid #0056b3; padding: 20px; border-radius: 8px; background: #f4f8ff; height: fit-content; position: sticky; top: 20px;">
-        <h3 style="color:#0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 10px; margin-top:0;">Resumen de tu Viaje</h3>
+    <div class="sidebar-resumen">
+        <h3>Resumen de tu Viaje</h3>
         <p><strong>Vuelo:</strong> <?=$vuelo_sel['numero_vuelo']?></p>
         <p><strong>Tarifa:</strong> <?=$plan_sel['nombre_plan']?></p>
         <p><strong>Pasajeros:</strong> x<?=$cantidad?></p>
         
-        <p style="margin-bottom:2px; font-weight:bold; margin-top:10px;">Asientos Asignados:</p>
-        <ul style="margin:0; padding-left:20px; font-size:13px; color:#444;">
+        <p class="titulo-subseccion-resumen">Asientos Asignados:</p>
+        <ul class="lista-resumen">
             <?php 
             // NUEVA LÓGICA DINÁMICA: No lee la BD, calcula el precio interpretando la fila del asiento string
             if (!empty($_SESSION['asiento_seleccionado'])) {
@@ -80,8 +92,9 @@ include_once '../../includes/header.php';
                     }
                     
                     $total_acumulado += $cargo_extra_asiento;
+                    $index_pasajero = $num_pasajero + 1; // Para ajustar si el array de asientos inicia en índice 0
                     ?>
-                    <li>Pasajero #<?=$num_pasajero?>: Asiento <strong><?=$asiento_texto?></strong> (+$<?=number_format($cargo_extra_asiento, 2)?>)</li>
+                    <li>Pasajero #<?=$index_pasajero?>: Asiento <strong><?=$asiento_texto?></strong> (+$<?=number_format($cargo_extra_asiento, 2)?>)</li>
                     <?php
                 }
             }
@@ -89,8 +102,8 @@ include_once '../../includes/header.php';
         </ul>
         
         <?php if(!empty($_SESSION['equipajes'])): ?>
-            <p style="margin-bottom:2px; font-weight:bold; margin-top:10px;">Equipaje Extra:</p>
-            <ul style="margin:0; padding-left:20px; font-size:13px; color:#444;">
+            <p class="titulo-subseccion-resumen">Equipaje Extra:</p>
+            <ul class="lista-resumen">
                 <?php foreach($_SESSION['equipajes'] as $num_p => $items): ?>
                     <?php foreach($items as $id => $cant): 
                         $stmtE = $pdo->prepare("SELECT nombre_tipo, precio_unitario FROM tipos_equipaje WHERE id_tipo_equipaje = ?");
@@ -107,8 +120,8 @@ include_once '../../includes/header.php';
         <?php endif; ?>
 
         <?php if(!empty($_SESSION['servicios'])): ?>
-            <p style="margin-bottom:2px; font-weight:bold; margin-top:10px;">Servicios adicionales:</p>
-            <ul style="margin:0; padding-left:20px; font-size:13px; color:#444;">
+            <p class="titulo-subseccion-resumen">Servicios adicionales:</p>
+            <ul class="lista-resumen">
                 <?php foreach($_SESSION['servicios'] as $num_p => $servicios_p): ?>
                     <?php foreach($servicios_p as $id_serv): 
                         $stmtS = $pdo->prepare("SELECT nombre_servicio, precio_servicio FROM servicios_adicionales WHERE id_servicio = ?");
@@ -124,10 +137,10 @@ include_once '../../includes/header.php';
             </ul>
         <?php endif; ?>
         
-        <hr style="border:0; border-top:1px dashed #ccc; margin-top:15px;">
-        <h4 style="margin:10px 0; display:flex; justify-content:space-between;">
+        <hr class="separador">
+        <h4 class="total-contenedor">
             <span>Total Acumulado:</span>
-            <span style="color:green;">$<?=number_format($total_acumulado, 2)?></span>
+            <span class="total-precio">$<?=number_format($total_acumulado, 2)?></span>
         </h4>
     </div>
 </div>

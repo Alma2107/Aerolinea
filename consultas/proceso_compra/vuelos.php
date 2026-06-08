@@ -33,18 +33,20 @@ $cantidad_pasajeros = $_SESSION['pasajeros'];
 include_once '../../includes/header.php';
 ?>
 
-<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; max-width: 1200px; margin: 20px auto; padding: 0 20px; font-family: sans-serif;">
+<link rel="stylesheet" href="css/estilos-vuelos.css">
+
+<div class="contenedor-vuelos">
     
     <form action="equipaje.php" method="POST">
         
-        <div class="card" style="border: 1px solid #ddd; padding: 20px; border-radius: 8px; margin-bottom: 20px; background:#fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-            <h2 style="color: #0056b3; margin-top:0;">🛫 1. Selecciona tus Vuelos</h2>
+        <div class="card">
+            <h2>🛫 1. Selecciona tus Vuelos</h2>
             
             <?php if ($tipo_viaje !== 'solo_vuelta'): ?>
-                <div style="margin-bottom: 20px;">
-                    <h4 style="margin-bottom: 8px; color: #333;">Vuelo de Ida:</h4>
+                <div class="bloque-vuelo">
+                    <h4>Vuelo de Ida:</h4>
                     <?php foreach($vuelos as $index => $v): ?>
-                        <label style="display: block; border: 1px solid #ccc; padding: 12px; margin-bottom: 8px; border-radius:6px; cursor: pointer; background: #fff; transition: background 0.2s;">
+                        <label class="opcion-vuelo">
                             <input type="radio" name="id_vuelo_ida" value="<?=$v['id_vuelo']?>" data-precio="<?=$v['precio_base_vuelo']?>" class="selector-vuelo" <?= $index === 0 ? 'checked' : '' ?> required>
                             <strong><?=$v['numero_vuelo']?></strong> - Salida: <?=$v['fecha_salida']?> | Base: <strong>$<?=number_format($v['precio_base_vuelo'], 2)?></strong>
                         </label>
@@ -55,10 +57,10 @@ include_once '../../includes/header.php';
             <?php endif; ?>
 
             <?php if ($tipo_viaje !== 'solo_ida'): ?>
-                <div>
-                    <h4 style="margin-bottom: 8px; color: #333;">Vuelo de Vuelta / Regreso:</h4>
+                <div class="bloque-vuelo">
+                    <h4>Vuelo de Vuelta / Regreso:</h4>
                     <?php foreach($vuelos as $index => $v): ?>
-                        <label style="display: block; border: 1px solid #ccc; padding: 12px; margin-bottom: 8px; border-radius:6px; cursor: pointer; background: #fff; transition: background 0.2s;">
+                        <label class="opcion-vuelo">
                             <input type="radio" name="id_vuelo_vuelta" value="<?=$v['id_vuelo']?>" data-precio="<?=$v['precio_base_vuelo']?>" class="selector-vuelo" <?= ($index === 0) ? 'checked' : '' ?> required>
                             <strong><?=$v['numero_vuelo']?></strong> - Regreso: <?=$v['fecha_salida']?> | Base: <strong>$<?=number_format($v['precio_base_vuelo'], 2)?></strong>
                         </label>
@@ -69,19 +71,19 @@ include_once '../../includes/header.php';
             <?php endif; ?>
         </div>
 
-        <div class="card" style="border: 1px solid #ddd; padding: 20px; border-radius: 8px; margin-bottom: 20px; background:#fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-            <h2 style="color: #0056b3; margin-top:0;">🎒 2. Personaliza las Tarifas por Pasajero</h2>
+        <div class="card">
+            <h2>🎒 2. Personaliza las Tarifas por Pasajero</h2>
             
             <?php for($i = 1; $i <= $cantidad_pasajeros; $i++): ?>
-                <div style="border: 1px solid #0056b3; padding: 15px; margin-bottom: 20px; border-radius: 8px; background: #fff;">
-                    <h3 style="margin-top: 0; color: #0056b3; border-bottom: 1px solid #eee; padding-bottom: 5px;">👤 Pasajero #<?=$i?></h3>
+                <div class="card-pasajero">
+                    <h3>👤 Pasajero #<?=$i?></h3>
                     
                     <?php if ($tipo_viaje !== 'solo_vuelta'): ?>
-                        <div class="contenedor-plan-ida" style="margin-bottom: 15px;">
-                            <h4 style="margin: 5px 0; color: #555; font-size: 14px;">✈️ Tarifa para la IDA:</h4>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+                        <div class="tramo-tarifa">
+                            <h4>✈️ Tarifa para la IDA:</h4>
+                            <div class="grid-planes">
                                 <?php foreach($planes as $index => $p): ?>
-                                    <label style="border: 1px solid #ddd; padding: 10px; border-radius:6px; background:#fafafa; display: block; cursor: pointer; font-size: 13px;">
+                                    <label class="opcion-plan">
                                         <input type="radio" name="planes[<?=$i?>][ida]" value="<?=$p['id_plan']?>" data-precio="<?=$p['cargo_extra_plan']?>" class="selector-plan" <?= $index === 0 ? 'checked' : '' ?> required>
                                         <strong><?=$p['nombre_plan']?></strong> (+$<?=number_format($p['cargo_extra_plan'], 0)?>)
                                     </label>
@@ -91,11 +93,11 @@ include_once '../../includes/header.php';
                     <?php endif; ?>
 
                     <?php if ($tipo_viaje !== 'solo_ida'): ?>
-                        <div class="contenedor-plan-vuelta">
-                            <h4 style="margin: 5px 0; color: #555; font-size: 14px;">🛬 Tarifa para la VUELTA:</h4>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+                        <div class="tramo-tarifa">
+                            <h4>🛬 Tarifa para la VUELTA:</h4>
+                            <div class="grid-planes">
                                 <?php foreach($planes as $index => $p): ?>
-                                    <label style="border: 1px solid #ddd; padding: 10px; border-radius:6px; background:#fafafa; display: block; cursor: pointer; font-size: 13px;">
+                                    <label class="opcion-plan">
                                         <input type="radio" name="planes[<?=$i?>][vuelta]" value="<?=$p['id_plan']?>" data-precio="<?=$p['cargo_extra_plan']?>" class="selector-plan" <?= $index === 0 ? 'checked' : '' ?> required>
                                         <strong><?=$p['nombre_plan']?></strong> (+$<?=number_format($p['cargo_extra_plan'], 0)?>)
                                     </label>
@@ -108,19 +110,19 @@ include_once '../../includes/header.php';
             <?php endfor; ?>
         </div>
 
-        <button type="submit" style="background:#0056b3; color:#fff; padding:14px 30px; border:none; border-radius:4px; cursor:pointer; font-weight:bold; font-size: 16px; width: 100%;">Continuar al Equipaje</button>
+        <button type="submit" class="btn-continuar">Continuar al Equipaje</button>
     </form>
 
-    <div style="border: 1px solid #0056b3; padding: 20px; border-radius: 8px; background: #f4f8ff; height: fit-content; position: sticky; top: 20px;">
-        <h3 style="color:#0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 10px; margin-top:0;">Resumen de tu Viaje</h3>
-        <p style="margin: 10px 0;"><strong>Pasajeros:</strong> x<?=$cantidad_pasajeros?></p>
+    <div class="sidebar-resumen">
+        <h3>Resumen de tu Viaje</h3>
+        <p><strong>Pasajeros:</strong> x<?=$cantidad_pasajeros?></p>
         
-        <div id="detalle-precio-dinamico" style="font-size: 13px; color: #444; line-height: 1.6;"></div>
+        <div id="detalle-precio-dinamico" class="detalle-dinamico"></div>
 
-        <hr style="border:0; border-top:1px dashed #0056b3; margin: 15px 0;">
-        <h3 style="margin:0; display:flex; justify-content:space-between; font-size: 18px;">
+        <hr class="separador">
+        <h3 class="total-contenedor">
             <span>Total Inicial:</span>
-            <span style="color:green;" id="total-vista">$0.00</span>
+            <span class="precio-verde" id="total-vista">$0.00</span>
         </h3>
     </div>
 </div>

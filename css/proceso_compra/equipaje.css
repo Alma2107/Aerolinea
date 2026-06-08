@@ -1,0 +1,132 @@
+.contenedor-equipaje {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 0 20px;
+    font-family: sans-serif;
+}
+
+.card {
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 8px;
+    background: #fff;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.card h3 {
+    margin-top: 0;
+    color: #0056b3;
+}
+
+.text-inclusion {
+    color: green;
+    margin-bottom: 15px;
+    font-size: 13px;
+}
+
+.grid-equipajes {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+}
+
+.item-equipaje {
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fafafa;
+}
+
+.item-equipaje h4 {
+    margin: 0;
+}
+
+.item-equipaje .descripcion {
+    font-size: 12px;
+    color: #555;
+    margin: 5px 0 0 0;
+}
+
+.item-equipaje .precio {
+    margin: 5px 0 0 0;
+    color: #0056b3;
+}
+
+.input-equipaje {
+    width: 60px;
+    padding: 8px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.btn-continuar {
+    background: #0056b3;
+    color: #fff;
+    padding: 14px 25px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 10px;
+    font-size: 15px;
+    width: 100%;
+}
+
+.sidebar-resumen {
+    border: 1px solid #0056b3;
+    padding: 20px;
+    border-radius: 8px;
+    background: #f4f8ff;
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+}
+
+.sidebar-resumen h3 {
+    color: #0056b3;
+    border-bottom: 2px solid #0056b3;
+    padding-bottom: 10px;
+    margin-top: 0;
+}
+
+.bloque-maletas {
+    display: none;
+    margin-top: 12px;
+}
+
+.bloque-maletas p {
+    margin-bottom: 4px;
+    font-weight: bold;
+}
+
+.lista-maletas {
+    margin: 0;
+    padding-left: 20px;
+    font-size: 13px;
+    color: #444;
+}
+
+.separador {
+    border: 0;
+    border-top: 1px dashed #ccc;
+    margin-top: 15px;
+}
+
+.total-contenedor {
+    margin: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    font-size: 16px;
+}
+
+.total-precio {
+    color: green;
+}

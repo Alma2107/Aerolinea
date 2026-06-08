@@ -25,7 +25,7 @@ try {
     $stmtP->execute([$id_plan]); 
     $precio_plan = $stmtP->fetchColumn();
 
-    // 2. Calcular e identificar costos totales combinados para el monto global de la orden
+    // 2. Calcular costos globales para el monto total de la orden
     $total_equipajes_global = 0; 
     if (!empty($_SESSION['equipajes'])) {
         foreach ($_SESSION['equipajes'] as $num_p => $items) {
@@ -65,12 +65,13 @@ try {
     $stmtOrden->execute(['cl' => $id_cliente, 'total' => $monto_total_orden, 'metodo' => $id_metodo_pago]);
     $id_orden = $pdo->lastInsertId();
 
+    // Generar PNR Único para la reserva
     $pnr = substr(str_shuffle("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"), 0, 6);
 
     // 4. Procesar cada Pasajero y vincular sus compras independientes
     foreach($_SESSION['datos_pasajeros'] as $index => $pas) {
         
-        // Insertar o verificar Pasajero en la BD
+        // Insertar o actualizar Pasajero en la BD
         $stmtPas = $pdo->prepare("INSERT INTO pasajeros (tipo_documento, numero_documento, nombre, apellido, fecha_nacimiento, asistencia_especial, detalles_medicos) 
             VALUES (:tipo_doc, :doc, :nom, :ape, :fnac, :asist, :detalles) ON DUPLICATE KEY UPDATE id_pasajero=LAST_INSERT_ID(id_pasajero)");
         $stmtPas->execute([
@@ -84,7 +85,7 @@ try {
         ]);
         $id_pasajero = $pdo->lastInsertId();
 
-        // Extraer el Asiento correspondiente a ESTE pasajero específico ($index)
+        // Extraer el Asiento correspondiente a ESTE pasajero específico
         $id_asiento_pasajero = $_SESSION['id_asiento'][$index] ?? null;
         $precio_asiento_individual = 0;
         if ($id_asiento_pasajero) {
@@ -112,12 +113,14 @@ try {
         // 5. Guardar Equipajes EXCLUSIVOS de este pasajero
         if (!empty($_SESSION['equipajes'][$index])) {
             foreach($_SESSION['equipajes'][$index] as $id_tipo => $cantidad) {
-                $stmtE = $pdo->prepare("SELECT precio_unitario FROM tipos_equipaje WHERE id_tipo_equipaje = ?");
-                $stmtE->execute([$id_tipo]);
-                $precio_u = $stmtE->fetchColumn();
+                if ($cantidad > 0) {
+                    $stmtE = $pdo->prepare("SELECT precio_unitario FROM tipos_equipaje WHERE id_tipo_equipaje = ?");
+                    $stmtE->execute([$id_tipo]);
+                    $precio_u = $stmtE->fetchColumn();
 
-                $stmtEqIns = $pdo->prepare("INSERT INTO ticket_equipajes (id_ticket, id_tipo_equipaje, cantidad, precio_pagado) VALUES (?, ?, ?, ?)");
-                $stmtEqIns->execute([$id_ticket, $id_tipo, $cantidad, ($precio_u * $cantidad)]);
+                    $stmtEqIns = $pdo->prepare("INSERT INTO ticket_equipajes (id_ticket, id_tipo_equipaje, cantidad, precio_pagado) VALUES (?, ?, ?, ?)");
+                    $stmtEqIns->execute([$id_ticket, $id_tipo, $cantidad, ($precio_u * $cantidad)]);
+                }
             }
         }
 
@@ -136,19 +139,43 @@ try {
 
     $pdo->commit();
     
-    // Limpieza total
-    unset($_SESSION['id_vuelo'], $_SESSION['id_plan'], $_SESSION['id_asiento'], $_SESSION['datos_pasajeros'], $_SESSION['equipajes'], $_SESSION['servicios'], $_SESSION['pasajeros']);
+    // Limpieza total del carrito de compras de la sesión
+    unset(
+        $_SESSION['id_vuelo'], 
+        $_SESSION['id_plan'], 
+        $_SESSION['id_asiento'], 
+        $_SESSION['datos_pasajeros'], 
+        $_SESSION['equipajes'], 
+        $_SESSION['servicios'], 
+        $_SESSION['pasajeros']
+    );
 
-    echo "<html><head><link rel='stylesheet' href='../../css/estilos.css'></head><body>";
-    echo "<div class='card' style='max-width:600px; margin:100px auto; text-align:center; border: 1px solid #ddd; padding: 30px; border-radius: 8px; font-family: Arial, sans-serif; background: #fff;'>";
-    echo "<h1 style='color: #28a745;'>🎉 ¡Pago Exitoso!</h1>";
-    echo "<p>Tu orden de compra <strong>#$id_orden</strong> fue procesada perfectamente.</p>";
-    echo "<p>El código PNR de tu reserva es: <strong style='font-size:20px; color:#0056b3;'>$pnr</strong></p>";
-    echo "<a href='../../index.php' style='display:inline-block; margin-top:15px; padding:10px 20px; background:#28a745; color:#fff; text-decoration:none; border-radius:4px; font-weight: bold;'>Volver al Home</a>";
-    echo "</div></body></html>";
+    include_once '../../includes/header.php';
+    ?>
+    <link rel="stylesheet" href="../../css/estilos-confirmar.css">
 
+    <div class="contenedor-exito">
+        <h1>🎉 ¡Pago Exitoso!</h1>
+        <p>Tu orden de compra <strong>#<?=$id_orden?></strong> fue procesada perfectamente.</p>
+        <p>El código PNR de tu reserva es:</p>
+        <div class="pnr-resaltado"><?=$pnr?></div>
+        <br>
+        <a href="../../index.php" class="btn-home">Volver al Home</a>
+    </div>
+    </body>
+    </html>
+
+<?php
 } catch (Exception $e) {
-    $pdo->rollBack();
-    echo "Error crítico de procesamiento en el servidor: " . $e->getMessage();
-}
-?>
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    include_once '../../includes/header.php';
+    ?>
+    <link rel="stylesheet" href="../../css/proceso_compra/confirmar.css">
+    <div class="error-servidor">
+        Error crítico de procesamiento en el servidor: <?=htmlspecialchars($e->getMessage())?>
+    </div>
+    </body>
+    </html>
+<?php } ?>

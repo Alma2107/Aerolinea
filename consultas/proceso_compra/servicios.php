@@ -59,23 +59,26 @@ if (!empty($_SESSION['id_vuelo_vuelta']) && $_SESSION['id_vuelo_vuelta'] > 0) {
 $servicios = $pdo->query("SELECT id_servicio, nombre_servicio, descripcion, precio_servicio FROM servicios_adicionales")->fetchAll(PDO::FETCH_ASSOC);
 include_once '../../includes/header.php';
 ?>
-<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; max-width: 1200px; margin: 20px auto; padding: 0 20px; font-family: sans-serif;">
+
+<link rel="stylesheet" href="css/proceso_compra/servicios.css">
+
+<div class="contenedor-servicios">
     
     <form action="asientos.php" method="POST" id="form-servicios">
         
         <?php for($i = 1; $i <= $cantidad_pasajeros; $i++): ?>
-            <div class="card" style="border: 1px solid #ddd; padding: 20px; border-radius: 8px; background:#fff; margin-bottom:20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                <h3 style="margin-top:0; color:#0056b3;">👤 Pasajero #<?=$i?>: Servicios adicionales a bordo</h3>
-                <p style="margin-bottom:15px; color:#666; font-size:13px;">Sumá extras opcionales exclusivos para este pasajero.</p>
+            <div class="card">
+                <h3>👤 Pasajero #<?=$i?>: Servicios adicionales a bordo</h3>
+                <p class="subtitulo-card">Sumá extras opcionales exclusivos para este pasajero.</p>
                 
-                <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+                <div class="grid-servicios">
                     <?php foreach($servicios as $s): ?>
-                        <div style="border: 1px solid #eee; padding: 12px; border-radius: 4px; background:#fafafa;">
-                            <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                        <div class="item-servicio">
+                            <label class="label-servicio">
                                 <input type="checkbox" name="servicios[<?=$i?>][]" value="<?=$s['id_servicio']?>" data-precio="<?=$s['precio_servicio']?>" data-nombre="P#<?=$i?> - <?=$s['nombre_servicio']?>" class="check-servicio"> 
                                 <div>
                                     <strong><?=$s['nombre_servicio']?></strong> (+$<?=number_format($s['precio_servicio'], 2)?>)
-                                    <p style="font-size: 11px; color:#666; margin:3px 0 0 0;"><?=$s['descripcion']?></p>
+                                    <p><?=$s['descripcion']?></p>
                                 </div>
                             </label>
                         </div>
@@ -84,11 +87,11 @@ include_once '../../includes/header.php';
             </div>
         <?php endfor; ?>
 
-        <button type="submit" style="background:#0056b3; color:#fff; padding:14px 30px; border:none; border-radius:4px; cursor:pointer; font-weight:bold; margin-top:10px; font-size:15px; width:100%;">Continuar a Elegir Asientos</button>
+        <button type="submit" class="btn-continuar">Continuar a Elegir Asientos</button>
     </form>
 
-    <div style="border: 1px solid #0056b3; padding: 20px; border-radius: 8px; background: #f4f8ff; height: fit-content; position: sticky; top: 20px;">
-        <h3 style="color:#0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 10px; margin-top:0;">Resumen de tu Viaje</h3>
+    <div class="sidebar-resumen">
+        <h3>Resumen de tu Viaje</h3>
         <p><strong>Vuelo principal:</strong> <?=$vuelo_sel['numero_vuelo']?></p>
         <p><strong>Tarifa base:</strong> <?=$plan_sel['nombre_plan']?></p>
         <p><strong>Pasajeros:</strong> x<?=$cantidad_pasajeros?></p>
@@ -97,8 +100,8 @@ include_once '../../includes/header.php';
         $subtotal_equipajes = 0;
         if(!empty($_SESSION['equipajes'])): 
         ?>
-            <p style="margin-bottom:2px; font-weight:bold; margin-top:10px;">Equipaje Extra Seleccionado:</p>
-            <ul style="margin:0; padding-left:20px; font-size:13px; color:#444; margin-bottom: 10px;">
+            <p class="titulo-seccion-resumen">Equipaje Extra Seleccionado:</p>
+            <ul class="lista-resumen lista-equipaje-resumen">
                 <?php foreach($_SESSION['equipajes'] as $num_p => $items): ?>
                     <?php foreach($items as $id => $cant): 
                         $stmtE = $pdo->prepare("SELECT nombre_tipo, precio_unitario FROM tipos_equipaje WHERE id_tipo_equipaje = ?");
@@ -118,59 +121,19 @@ include_once '../../includes/header.php';
         $total_con_equipaje = $total_acumulado + $subtotal_equipajes;
         ?>
         
-        <div id="contenedor-servicios-dinamico" style="display:none;">
-            <p style="margin-bottom:2px; font-weight:bold; margin-top:10px;">Servicios de a bordo:</p>
-            <ul id="lista-servicios-vista" style="margin:0; padding-left:20px; font-size:13px; color:#444;"></ul>
+        <div id="contenedor-servicios-dinamico" class="bloque-dinamico">
+            <p class="titulo-seccion-resumen">Servicios de a bordo:</p>
+            <ul id="lista-servicios-vista" class="lista-resumen"></ul>
         </div>
         
-        <hr style="border:0; border-top:1px dashed #ccc; margin-top:15px;">
-        <h4 style="margin:10px 0; display:flex; justify-content:space-between; font-size: 16px;">
+        <hr class="separador">
+        <h4 class="total-contenedor">
             <span>Total Acumulado:</span>
-            <span style="color:green;" id="total-vista" data-base="<?=$total_con_equipaje?>">$<?=number_format($total_con_equipaje, 2)?></span>
+            <span class="total-precio" id="total-vista" data-base="<?=$total_con_equipaje?>">$<?=number_format($total_con_equipaje, 2)?></span>
         </h4>
     </div>
 </div>
 
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    const totalVista = document.getElementById('total-vista');
-    const contenedorServicios = document.getElementById('contenedor-servicios-dinamico');
-    const listaServiciosVista = document.getElementById('lista-servicios-vista');
-    const baseTotal = parseFloat(totalVista.getAttribute('data-base'));
-
-    function actualizarServiciosYTotal() {
-        let cargoServicios = 0;
-        let htmlLista = "";
-        const seleccionados = document.querySelectorAll('.check-servicio:checked');
-
-        seleccionados.forEach(checkbox => {
-            const precio = parseFloat(checkbox.getAttribute('data-precio')) || 0;
-            const nombre = checkbox.getAttribute('data-nombre');
-            cargoServicios += precio;
-            htmlLista += `<li>${nombre} (+$${precio.toFixed(2)})</li>`;
-        });
-
-        // Mostrar u ocultar la sección de servicios en el resumen lateral
-        if (seleccionados.length > 0) {
-            contenedorServicios.style.display = "block";
-            listaServiciosVista.innerHTML = htmlLista;
-        } else {
-            contenedorServicios.style.display = "none";
-            listaServiciosVista.innerHTML = "";
-        }
-
-        // Modificar precio final reflejado
-        let nuevoTotal = baseTotal + cargoServicios;
-        totalVista.textContent = '$' + nuevoTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    }
-
-    document.querySelectorAll('.check-servicio').forEach(check => {
-        check.addEventListener('change', actualizarServiciosYTotal);
-    });
-
-    // Ejecución inicial preventiva
-    actualizarServiciosYTotal();
-});
-</script>
+<script src="js/proceso_compra/servicios.js"></script>
 </body>
 </html>
