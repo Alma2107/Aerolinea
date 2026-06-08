@@ -22,7 +22,7 @@ include_once 'includes/header.php';
 ?>
 
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="css/estilos_vuelos.css">
+<link rel="stylesheet" href="css/index.css">
 
 <body>
 <main class="hero-banner">
@@ -37,10 +37,22 @@ include_once 'includes/header.php';
         <div class="form-container">
             <form action="consultas/proceso_compra/vuelos.php" method="GET" autocomplete="off">
                 
-                <div class="trip-type-selector">
+                <div class="trip-type-selector" style="margin-bottom: 15px;">
                     <label><input type="radio" name="tipo_viaje" value="solo_ida" id="radio-solo-ida"> Ida</label>
-                    <label><input type="radio" name="tipo_viaje" value="ida_vuelta" id="radio-ida-vuelta" checked> Vuelta</label>
-                    <label><input type="radio" name="tipo_viaje" value="multidestino" id="radio-multidestino"> Multidestino</label>
+                    <label><input type="radio" name="tipo_viaje" value="solo_vuelta" id="radio-solo-vuelta"> Vuelta</label>
+                    <label><input type="radio" name="tipo_viaje" value="ida_vuelta" id="radio-ida-vuelta" checked> Ida y Vuelta</label>
+                    <label><input type="radio" name="tipo_viaje" value="multidestino" id="radio-multidestino"> Multitramo</label>
+                </div>
+
+                <div class="pasajeros-selector" style="margin-bottom: 20px; font-family: 'Inter', sans-serif;">
+                    <label for="pasajeros" style="font-weight: 600; font-size: 14px; color: #333; display: block; margin-bottom: 5px;">Cantidad de Pasajeros:</label>
+                    <select name="pasajeros" id="pasajeros" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; width: 120px; background: #fff;">
+                        <option value="1" selected>1 Pasajero</option>
+                        <option value="2">2 Pasajeros</option>
+                        <option value="3">3 Pasajeros</option>
+                        <option value="4">4 Pasajeros</option>
+                        <option value="5">5 Pasajeros</option>
+                    </select>
                 </div>
 
                 <button type="button" id="btn-nuevo-tramo" class="btn-add-tramo" style="display: none;">+ Agregar tramo</button>
@@ -62,7 +74,7 @@ include_once 'includes/header.php';
     </svg>
 </section>
 
-<script src="js/buscador_vuelos.js"></script>
+<script src="js/index.js"></script>
 <script>
 const profileToggle = document.getElementById('profileToggle');
 if(profileToggle) {
@@ -75,11 +87,5 @@ if(profileToggle) {
     });
 }
 </script>
-</body>
-</html>
-</body>
-</html>
-</body>
-</html>
 </body>
 </html>

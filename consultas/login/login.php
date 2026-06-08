@@ -225,7 +225,7 @@ $mode = isset($_GET['mode']) && $_GET['mode'] === 'login' ? 'login' : 'register'
  
 </div>
  
-<script src="../../js/login-animacion.js"></script>
+<script src="../../js/login/login-animacion.js"></script>
 <script>
     // Limpia la caja de error visualmente si el usuario cambia voluntariamente de pestaña
     const cleanError = () => {
