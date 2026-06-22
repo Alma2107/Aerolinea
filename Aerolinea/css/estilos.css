@@ -1,0 +1,831 @@
+/* css/estilos.css */
+:root {
+    --primary-color: #0f2c59;
+    --secondary-color: #00a896;
+    --orange-color: #ff9f1c;
+    --light-bg: #f4f6f9;
+    --dark-text: #333;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+body { background-color: var(--light-bg); color: var(--dark-text); padding-bottom: 50px; }
+
+/* Header */
+.main-header { background-color: var(--primary-color); color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+.logo { font-size: 22px; font-weight: bold; }
+.btn-nav { color: white; text-decoration: none; margin-left: 15px; padding: 6px 12px; border-radius: 4px; border: 1px solid white; font-size: 14px; }
+.btn-danger { background-color: #d9534f; border-color: #d9534f; }
+
+/* Contenedor Flex de Pasos */
+.booking-layout { display: flex; max-width: 1200px; margin: 30px auto; gap: 20px; padding: 0 15px; }
+.main-content { flex: 3; }
+.sidebar-resumen { flex: 1; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); height: fit-content; }
+
+/* Formularios y Botones */
+.card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
+.btn-next { background-color: var(--secondary-color); color: white; border: none; padding: 12px 25px; font-size: 16px; border-radius: 4px; cursor: pointer; display: inline-block; text-decoration: none; text-align: center; margin-top: 15px; }
+
+/* Grids Específicos */
+.grid-tarifas { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+.tarifa-card { border: 2px solid #ddd; border-radius: 6px; padding: 15px; text-align: center; cursor: pointer; position: relative; }
+.tarifa-card.selected { border-color: var(--primary-color); background-color: #f0f4f8; }
+
+.grid-equipaje { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+.equipaje-card { border: 1px solid #ccc; padding: 15px; text-align: center; border-radius: 6px; }
+
+.mapa-asientos { display: grid; grid-template-columns: repeat(3, 50px) 20px repeat(3, 50px); gap: 10px; justify-content: center; margin-top: 20px; }
+.asiento { width: 50px; height: 50px; background-color: #e0e0e0; text-align: center; line-height: 50px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+.asiento.selected { background-color: var(--secondary-color); color: white; }
+.asiento.pasillo { background: transparent; cursor: default; }
+
+/* ===========================
+   HEADER MEJORADO
+=========================== */
+
+.main-header{
+    background-color: var(--primary-color);
+    color:white;
+    padding:15px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    position:sticky;
+    top:0;
+    z-index:1000;
+}
+
+.logo{
+    font-size:24px;
+    font-weight:bold;
+    
+}
+
+.menu-central{
+    display:flex;
+    gap:25px;
+}
+
+.menu-central a{
+    color:white;
+    text-decoration:none;
+    font-size:15px;
+    transition:.3s;
+}
+
+.menu-central a:hover{
+    color:var(--orange-color);
+}
+
+.nav-menu{
+    display:flex;
+    align-items:center;
+}
+
+.user-welcome{
+    color:white;
+    margin-right:15px;
+    font-size:14px;
+}
+
+.btn-primary{
+    background:var(--secondary-color);
+    border-color:var(--secondary-color);
+}
+
+/* ===========================
+   CARRUSEL
+=========================== */
+
+.hero-slider{
+    width:100%;
+    height:500px;
+    overflow:hidden;
+    position:relative;
+    margin-bottom:40px;
+}
+
+.slide{
+    width:100%;
+    height:100%;
+    position:relative;
+}
+
+.slide img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.slide-text{
+    position:absolute;
+    top:50%;
+    left:10%;
+    transform:translateY(-50%);
+    background:rgba(0,0,0,.5);
+    color:white;
+    padding:30px;
+    border-radius:8px;
+}
+
+.slide-text h1{
+    font-size:42px;
+    margin-bottom:10px;
+}
+
+.slide-text p{
+    font-size:18px;
+}
+
+/* ===========================
+   SERVICIOS RAPIDOS
+=========================== */
+
+.quick-services{
+    max-width:1200px;
+    margin:0 auto 40px;
+    padding:0 15px;
+
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:20px;
+}
+
+.service-card{
+    background:white;
+    padding:25px;
+    border-radius:8px;
+    box-shadow:0 2px 10px rgba(0,0,0,.05);
+    text-align:center;
+    transition:.3s;
+}
+
+.service-card:hover{
+    transform:translateY(-5px);
+}
+
+.service-card h3{
+    color:var(--primary-color);
+    margin-bottom:10px;
+}
+
+/* ===========================
+   DESTINOS
+=========================== */
+
+.destinos{
+    max-width:1200px;
+    margin:0 auto 50px;
+    padding:0 15px;
+}
+
+.destinos h2{
+    text-align:center;
+    margin-bottom:25px;
+    color:var(--primary-color);
+}
+
+.destinos-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:20px;
+}
+
+.destino-card{
+    background:white;
+    border-radius:8px;
+    overflow:hidden;
+    box-shadow:0 2px 10px rgba(0,0,0,.05);
+}
+
+.destino-card img{
+    width:100%;
+    height:200px;
+    object-fit:cover;
+}
+
+.destino-card h3{
+    padding:15px;
+    text-align:center;
+}
+
+/* ===========================
+   PROMOCIONES
+=========================== */
+
+.promociones{
+    max-width:1200px;
+    margin:0 auto 50px;
+    padding:0 15px;
+}
+
+.promociones h2{
+    text-align:center;
+    margin-bottom:25px;
+    color:var(--primary-color);
+}
+
+.promo-container{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:20px;
+}
+
+.promo-card{
+    background:white;
+    padding:25px;
+    border-radius:8px;
+    box-shadow:0 2px 10px rgba(0,0,0,.05);
+    text-align:center;
+    border-top:5px solid var(--orange-color);
+}
+
+.promo-card h3{
+    color:var(--primary-color);
+    margin-bottom:10px;
+}
+
+/* ===========================
+   BUSCADOR DE VUELOS
+=========================== */
+
+.booking-layout{
+    margin-top:50px;
+}
+
+/* ===========================
+   RESPONSIVE
+=========================== */
+
+@media (max-width: 900px){
+
+    .main-header{
+        flex-direction:column;
+        gap:15px;
+    }
+
+    .menu-central{
+        flex-wrap:wrap;
+        justify-content:center;
+    }
+
+    .slide-text h1{
+        font-size:28px;
+    }
+
+    .slide-text p{
+        font-size:16px;
+    }
+
+}
+
+.hero-slider{
+    width:100%;
+    height:500px;
+    position:relative;
+}
+
+.slide{
+    position:absolute;
+    width:100%;
+    height:100%;
+    opacity:0;
+    transition:opacity .8s ease;
+}
+
+.slide.active{
+    opacity:1;
+}
+
+.slide img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.slide-text{
+    position:absolute;
+    top:50%;
+    left:10%;
+    transform:translateY(-50%);
+    background:rgba(0,0,0,.5);
+    color:white;
+    padding:25px;
+    border-radius:8px;
+}
+
+.slider-btn{
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    background:rgba(0,0,0,.5);
+    color:white;
+    border:none;
+    font-size:28px;
+    padding:15px;
+    cursor:pointer;
+    z-index:10;
+}
+
+.prev{
+    left:15px;
+}
+
+.next{
+    right:15px;
+}
+
+.slider-btn:hover{
+    background:rgba(0,0,0,.8);
+}
+
+/* ========================================================================== 
+   12. REESTILO MODERNO DEL SITIO PRINCIPAL
+   ========================================================================== */
+body {
+    font-family: "Segoe UI", "Trebuchet MS", Arial, sans-serif;
+    background:
+        radial-gradient(circle at top left, rgba(15, 44, 89, 0.12), transparent 30%),
+        linear-gradient(180deg, #f7f9fc 0%, #eef4fb 100%);
+    color: #10233f;
+}
+
+.main-header {
+    background: linear-gradient(90deg, #0b2348 0%, #143b6f 50%, #0f2c59 100%);
+    box-shadow: 0 10px 30px rgba(7, 22, 45, 0.18);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.menu-central {
+    display: flex;
+    gap: 24px;
+}
+
+.menu-central a,
+.nav-menu .btn-nav,
+.nav-menu .user-welcome {
+    color: #f7fbff;
+}
+
+.nav-menu .btn-nav {
+    border-color: rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.nav-menu .btn-primary {
+    background: #00a896;
+    border-color: #00a896;
+}
+
+.nav-menu .btn-danger {
+    background: #e14b4b;
+    border-color: #e14b4b;
+}
+
+.hero-slider {
+    height: 540px;
+    border-bottom: 1px solid rgba(15, 44, 89, 0.08);
+}
+
+.slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: scale(1.02);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.slide.active {
+    opacity: 1;
+    transform: scale(1);
+    z-index: 2;
+}
+
+.slide::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(8, 18, 35, 0.7) 10%, rgba(8, 18, 35, 0.2) 65%, rgba(8, 18, 35, 0.05) 100%);
+}
+
+.slide-text {
+    z-index: 3;
+    max-width: 620px;
+    background: rgba(6, 15, 28, 0.42);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(10px);
+}
+
+.slider-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 46px;
+    height: 46px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.82);
+    color: #0f2c59;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 4;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.slider-btn.prev { left: 18px; }
+.slider-btn.next { right: 18px; }
+
+.quick-services,
+.travel-carousel-section,
+.recommended-trips,
+.about-us,
+.booking-layout {
+    max-width: 1240px;
+    margin: 0 auto 40px;
+    padding: 0 20px;
+}
+
+.quick-services {
+    margin-top: -42px;
+    position: relative;
+    z-index: 5;
+}
+
+.service-card,
+.card,
+.trip-card,
+.travel-card,
+.about-panel {
+    border: 1px solid rgba(15, 44, 89, 0.08);
+    box-shadow: 0 18px 45px rgba(15, 44, 89, 0.08);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.94);
+    
+}
+
+.service-card {
+    padding: 24px;
+    text-align: left;
+}
+
+.service-card p,
+.section-copy,
+.travel-card-overlay p,
+.trip-card p,
+.about-panel p {
+    color: #5c6b7e;
+}
+
+.card {
+    padding: 28px;
+}
+
+.eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 11px;
+    color: #0d7fd4;
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+
+.section-copy {
+    margin: 10px 0 20px;
+}
+
+.trip-type-selector {
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.trip-type-selector label {
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: #eef5ff;
+    color: #0f2c59;
+}
+
+.search-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.search-grid select,
+.search-grid input {
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 14px;
+    border: 1px solid #d4ddeb;
+    border-radius: 14px;
+    background: #fff;
+    color: #13253d;
+}
+
+.search-grid input[type="number"] {
+    max-width: 160px;
+}
+
+.btn-next {
+    background: linear-gradient(90deg, #fec901, #ffdb4d);
+    color: #0f2c59;
+    border-radius: 14px;
+    box-shadow: 0 14px 30px rgba(254, 201, 1, 0.25);
+    font-weight: 900;
+    letter-spacing: 0.02em;
+}
+
+.section-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 18px;
+}
+
+.section-heading h2 {
+    font-size: clamp(26px, 3vw, 40px);
+    line-height: 1.1;
+    color: #0f2c59;
+}
+
+.travel-carousel {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 18px;
+}
+
+.travel-card {
+    position: relative;
+    overflow: hidden;
+    min-height: 280px;
+}
+
+.travel-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.travel-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(8, 18, 35, 0.05), rgba(8, 18, 35, 0.8));
+}
+
+.travel-card-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    padding: 20px;
+    color: #fff;
+}
+
+.travel-card-overlay h3,
+.travel-card-overlay p {
+    color: #fff;
+}
+
+.travel-card-large {
+    min-height: 350px;
+}
+
+.travel-badge,
+.trip-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(8px);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.recommended-trips .trip-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.trip-card {
+    padding: 22px;
+    min-height: 240px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border-top: 5px solid #0d7fd4;
+}
+
+.trip-card img {
+    width: 100%;
+    height: 220px; /* todas tendrán la misma altura */
+    object-fit: cover;
+    display: block;
+    border-radius: 12px;
+}
+
+.trip-card ul,
+.about-panel ul {
+    padding-left: 18px;
+    color: #5c6b7e;
+}
+
+.trip-card-brasil { border-top-color: #009b3a; }
+.trip-card-argentina { border-top-color: #74acdf; }
+.trip-card-uruguay { border-top-color: #0c8fdc; }
+.trip-card-chile { border-top-color: #d63f31; }
+
+.about-us {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 18px;
+}
+
+.about-panel {
+    padding: 28px;
+}
+
+.about-panel-alt {
+    background: linear-gradient(180deg, #0f2c59, #163c73);
+    color: #f7fbff;
+}
+
+.about-panel-alt h3,
+.about-panel-alt p,
+.about-panel-alt li {
+    color: #f7fbff;
+}
+
+.about-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 20px;
+}
+
+.about-stats div {
+    padding: 16px;
+    border-radius: 16px;
+    background: rgba(15, 44, 89, 0.04);
+}
+
+.about-stats strong {
+    display: block;
+    font-size: 24px;
+    color: #0f2c59;
+}
+
+.about-stats span {
+    color: #5c6b7e;
+}
+
+@media (max-width: 1100px) {
+    .travel-carousel,
+    .recommended-trips .trip-grid,
+    .about-us {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .travel-card-large {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 768px) {
+    .quick-services,
+    .travel-carousel-section,
+    .recommended-trips,
+    .about-us,
+    .booking-layout {
+        padding: 0 14px;
+    }
+
+    .travel-carousel,
+    .recommended-trips .trip-grid,
+    .about-us,
+    .search-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-slider {
+        height: 460px;
+    }
+
+    .slide-text {
+        left: 18px;
+        right: 18px;
+        padding: 22px;
+    }
+
+    .slider-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+
+    .about-stats {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ========================================================================== 
+   13. FOOTER GLOBAL
+   ========================================================================== */
+html, body {
+    min-height: 100%;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+body > .footer {
+    margin-top: auto;
+}
+
+.footer {
+    background: linear-gradient(180deg, #0b2348, #081a34);
+    color: #f7fbff;
+    padding: 42px 20px 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.footer-contenido {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr 1fr 1fr;
+    gap: 28px;
+    max-width: 1240px;
+    margin: 0 auto;
+}
+
+.footer-col {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.footer-col h3 {
+    margin: 0;
+    color: #fec901;
+    font-size: 18px;
+}
+
+.footer-col p,
+.footer-col a,
+.footer-bottom p {
+    color: rgba(247, 251, 255, 0.84);
+    text-decoration: none;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.footer-col a:hover {
+    color: #fec901;
+}
+
+.redes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.redes a {
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.footer-bottom {
+    max-width: 1240px;
+    margin: 24px auto 0;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: center;
+}
+
+@media (max-width: 900px) {
+    .footer-contenido {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .footer-contenido {
+        grid-template-columns: 1fr;
+    }
+}

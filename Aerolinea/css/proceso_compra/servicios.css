@@ -1,0 +1,166 @@
+.contenedor-servicios {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 0 20px;
+    font-family: sans-serif;
+}
+
+.card {
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 8px;
+    background: #fff;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.card h3 {
+    margin-top: 0;
+    color: #0056b3;
+}
+
+.subtitulo-card {
+    margin-bottom: 15px;
+    color: #666;
+    font-size: 13px;
+}
+
+.grid-servicios {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+.item-servicio {
+    border: 1px solid #eee;
+    padding: 12px;
+    border-radius: 4px;
+    background: #fafafa;
+}
+
+.label-servicio {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.label-servicio p {
+    font-size: 11px;
+    color: #666;
+    margin: 3px 0 0 0;
+}
+
+.btn-continuar {
+    background: #0056b3;
+    color: #fff;
+    padding: 14px 30px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 10px;
+    font-size: 15px;
+    width: 100%;
+}
+
+.sidebar-resumen {
+    border: 1px solid #0056b3;
+    padding: 20px;
+    border-radius: 8px;
+    background: #f4f8ff;
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+}
+
+.sidebar-resumen h3 {
+    color: #0056b3;
+    border-bottom: 2px solid #0056b3;
+    padding-bottom: 10px;
+    margin-top: 0;
+}
+
+.titulo-seccion-resumen {
+    margin-bottom: 2px;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.lista-resumen {
+    margin: 0;
+    padding-left: 20px;
+    font-size: 13px;
+    color: #444;
+}
+
+.lista-equipaje-resumen {
+    margin-bottom: 10px;
+}
+
+.bloque-dinamico {
+    display: none;
+}
+
+.separador {
+    border: 0;
+    border-top: 1px dashed #ccc;
+    margin-top: 15px;
+}
+
+.total-contenedor {
+    margin: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    font-size: 16px;
+}
+
+.total-precio {
+    color: green;
+}
+
+/* =====================================================================
+   AFINADO VISUAL DEL PASO DE SERVICIOS
+   ===================================================================== */
+.contenedor-servicios {
+    grid-template-columns: minmax(0, 2.1fr) minmax(280px, 0.9fr);
+    max-width: 1240px;
+}
+
+.item-servicio {
+    border: 1px solid rgba(15, 44, 89, 0.08);
+    border-radius: 16px;
+    background: linear-gradient(180deg, #ffffff, #f7fbff);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.item-servicio:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px rgba(15, 44, 89, 0.1);
+}
+
+.label-servicio {
+    align-items: flex-start;
+}
+
+.btn-continuar {
+    background: linear-gradient(90deg, #fec901, #ffdb4d);
+    color: #0f2c59;
+    border: none;
+    padding: 15px 28px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: 900;
+    width: 100%;
+    margin-top: 18px;
+    font-size: 16px;
+}
+
+@media (max-width: 900px) {
+    .contenedor-servicios {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,408 @@
+/* ==========================================================================
+   1. CONFIGURACIÓN GENERAL Y RESET
+   ========================================================================== */
+* { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+}
+
+body { 
+    font-family: 'Arial', sans-serif; 
+    background-color: #ffffff; 
+    color: #0a1f3d; 
+    overflow-x: hidden; 
+}
+
+
+/* ==========================================================================
+   2. HEADER / NAVBAR (LÍNEA AMARILLA CONTINUA Y EXTENDIDA)
+   ========================================================================== */
+.navbar {
+    position: absolute; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: transparent; 
+    padding: 25px 40px;
+    z-index: 100; 
+}
+
+.logo a {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+/* Contenedor derecho que genera la línea amarilla abajo de todos los elementos */
+.nav-menu-box {
+    display: flex;
+    align-items: center;
+    gap: 35px; /* Espacio uniforme entre textos */
+    padding-bottom: 8px; /* Separación entre el texto y la línea */
+    border-bottom: 2px solid #fec901; /* LA LÍNEA AMARILLA CONTINUA MAS LARGA */
+}
+
+/* Enlaces base blancos (Inicio y Vuelos) */
+.nav-item-link {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    transition: opacity 0.2s;
+}
+
+.nav-item-link:hover {
+    opacity: 0.8;
+}
+
+/* Texto de Registrarse (Letra Amarilla sin subrayado individual) */
+.nav-register-plain {
+    color: #fec901; 
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Texto de saludo con sesión iniciada (Letra Amarilla) */
+.user-welcome-text {
+    color: #fec901; 
+    font-size: 16px;
+    font-weight: bold;
+}
+
+/* Icono de la personita (Amarillo puro, alineado) */
+.user-avatar-icon {
+    font-size: 18px;
+    color: #fec901; 
+    display: inline-block;
+}
+
+/* Estructura del menú desplegable del perfil */
+.user-profile-menu {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 40px;
+    right: 0;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    width: 180px;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.dropdown-menu a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    color: #0a1f3d;
+    text-decoration: none;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.dropdown-menu a:hover { background: #f4f6f9; }
+.dropdown-menu a.delete-account { color: #ef4444; border-top: 1px solid #edf2f7; }
+.user-profile-menu.active .dropdown-menu { display: block; }
+
+/* ==========================================================================
+   3. ESTRUCTURA PRINCIPAL (BANNER AVION & TABLA EN LA MITAD)
+   ========================================================================== */
+.hero-banner {
+    position: relative;
+    width: 100%;
+    min-height: 540px; 
+    background-image: url('../img/ImagenInicio.jfif'); 
+    background-size: cover;
+    background-position: center 5%; 
+    background-repeat: no-repeat;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 0 24px;
+}
+
+.booking-card {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    width: 100%;
+    max-width: 1080px; 
+    border-radius: 18px;
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.12);
+    position: relative;
+    z-index: 10;
+    margin-top: 340px; 
+    margin-bottom: -220px; /* Corta la imagen justo por la mitad de la tabla */
+    overflow: hidden;
+}
+
+/* ==========================================================================
+   4. PESTAÑAS DE NAVEGACIÓN (DENTRO DE LA TARJETA BLANCA)
+   ========================================================================== */
+.search-tabs {
+    display: flex;
+    background: #ffffff;
+    border-bottom: 1px solid #e8edf2;
+    user-select: none;
+}
+
+.tab-item {
+    padding: 20px 32px; 
+    font-family: 'Montserrat', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #9aa8b8;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 3px solid transparent;
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.tab-item i { font-size: 16px; }
+.tab-item.active { color: #0d7fd4; border-bottom-color: #0d7fd4; }
+
+/* ==========================================================================
+   5. FORMULARIO Y FILAS DINÁMICAS (GRID DE ENTRADAS)
+   ========================================================================== */
+.form-container { 
+    padding: 36px 40px 40px; 
+}
+
+.trip-type-selector { 
+    display: flex; 
+    gap: 24px; 
+    margin-bottom: 24px; 
+}
+
+.trip-type-selector label { 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    font-size: 14px; 
+    color: #0d7fd4; 
+    font-weight: 600; 
+    cursor: pointer; 
+}
+
+.trip-type-selector input[type="radio"] { 
+    accent-color: #0d7fd4; 
+    width: 18px; 
+    height: 18px; 
+}
+
+.tramos-wrapper { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 16px; 
+    margin-bottom: 32px; 
+}
+
+.tramo-row { 
+    display: grid; 
+    gap: 16px; 
+    align-items: flex-end; 
+    position: relative; 
+}
+
+.tramo-row.standard-row { 
+    grid-template-columns: 1.2fr 1.2fr 1fr 1fr 0.7fr; 
+    background: none; 
+    border: none; 
+    padding: 0; 
+}
+
+.tramo-row.standard-row.solo-ida {
+    grid-template-columns: 1.3fr 1.3fr 1fr 0.7fr;
+}
+
+.tramo-row.multidestino-row {
+    grid-template-columns: 1.2fr 1.2fr 1fr auto;
+    background: rgba(255, 255, 255, 0.5);
+    padding: 18px;
+    border-radius: 10px;
+    border: 1px solid rgba(204, 215, 226, 0.4);
+}
+
+/* ==========================================================================
+   6. COMPONENTES DE ENTRADA (INPUTS)
+   ========================================================================== */
+.input-group { 
+    position: relative; 
+    display: flex; 
+    flex-direction: column; 
+}
+
+.input-group label { 
+    display: block; 
+    font-size: 12px; 
+    font-weight: 600; 
+    color: #8a99ad; 
+    margin-bottom: 8px; 
+}
+
+.input-field { 
+    width: 100%; 
+    padding: 14px 16px; 
+    border: 1px solid #d4dde6; 
+    border-radius: 6px; 
+    font-size: 15px; 
+    color: #0a1f3d; 
+    background: #ffffff; 
+    outline: none; 
+    transition: border-color 0.2s;
+}
+
+.input-field:focus { 
+    border-color: #0d7fd4; 
+}
+
+/* ==========================================================================
+   7. BOTONES (AGREGAR TRAMOS Y BUSCADOR PRINCIPAL)
+   ========================================================================== */
+.btn-add-tramo {
+    background: #0d7fd4;
+    color: white;
+    border: none;
+    padding: 11px 20px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-bottom: 24px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s;
+}
+
+.btn-add-tramo:hover { background: #0a64a7; }
+
+.btn-remove-tramo {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.search-footer-row { 
+    display: flex; 
+    justify-content: center; 
+}
+
+.btn-search { 
+    width: 100%; 
+    max-width: 560px; 
+    padding: 16px 44px; 
+    border: none; 
+    border-radius: 6px; 
+    background: #fec901; 
+    color: #0a1f3d; 
+    font-family: 'Montserrat', sans-serif; 
+    font-weight: 800; 
+    font-size: 18px; 
+    text-transform: uppercase; 
+    cursor: pointer; 
+    transition: background 0.2s ease;
+}
+
+.btn-search:hover { 
+    background: #e8b800; 
+}
+
+/* ==========================================================================
+   8. AUTOCOMPLETADO Y SUGERENCIAS
+   ========================================================================== */
+.autocomplete-suggestions {
+    position: absolute; top: 100%; left: 0; right: 0;
+    background: white; border: 1px solid #ccd7e2; border-radius: 0 0 8px 8px;
+    max-height: 180px; overflow-y: auto; z-index: 999; box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
+
+.suggestion-item { padding: 10px 12px; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f1f5f9; }
+.suggestion-item:hover { background-color: #f0f7ff; color: #0d7fd4; }
+
+/* ==========================================================================
+   9. CALENDARIO PERSONALIZADO
+   ========================================================================== */
+.custom-calendar-picker {
+    display: none; position: absolute; top: 100%; left: 0; width: 300px;
+    background: white; border: 1px solid #ccd7e2; border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15); padding: 12px; z-index: 1000;
+    user-select: none;
+}
+
+.calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: 700; font-size: 14px;}
+.calendar-header button { background: none; border: none; cursor: pointer; font-size: 14px; color: #0d7fd4; }
+.calendar-days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+.calendar-day-label { font-size: 11px; font-weight: bold; color: #64748b; }
+.calendar-day { padding: 6px 0; font-size: 12px; border-radius: 4px; color: #cbd5e1; cursor: not-allowed; background: #f8fafc; }
+.calendar-day.available-flight { color: #0a1f3d; font-weight: 600; background: #e0f2fe; cursor: pointer; border: 1px solid #bae6fd; }
+.calendar-day.available-flight:hover { background: #0d7fd4; color: white; }
+
+/* ==========================================================================
+   10. SECCIÓN INFERIOR AMARILLA (OLAS SVG)
+   ========================================================================== */
+.bottom-yellow-section {
+    position: relative;
+    background: #fec901;
+    min-height: 320px;
+    width: 100%;
+    margin-top: 300px; /* Deja ver el bloque blanco de fondo */
+    z-index: 1;
+}
+
+.bottom-yellow-section .wave-svg { 
+    position: absolute; 
+    bottom: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 70px; 
+    display: block; 
+}
+
+/* ==========================================================================
+   11. RESPONSIVE DESIGN (ADAPTACIÓN MÓVIL)
+   ========================================================================== */
+@media (max-width: 992px) {
+    .booking-card { max-width: 92%; margin-top: 320px; margin-bottom: -180px; }
+    .bottom-yellow-section { margin-top: 220px; }
+}
+
+@media (max-width: 768px) {
+    .tramo-row.standard-row,
+    .tramo-row.standard-row.solo-ida {
+        grid-template-columns: 1fr 1fr;
+    }
+    .search-tabs { overflow-x: auto; }
+    .tab-item { padding: 14px 18px; white-space: nowrap; }
+    
+    .navbar { padding: 15px 20px; }
+    .nav-menu-box { gap: 15px; }
+    .hero-banner { min-height: 420px; }
+    .booking-card { margin-top: 240px; margin-bottom: -120px; max-width: 100%; }
+    .bottom-yellow-section { margin-top: 160px; }
+}

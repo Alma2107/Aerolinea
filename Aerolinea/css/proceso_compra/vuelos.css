@@ -1,0 +1,267 @@
+.contenedor-vuelos {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 0 20px;
+    font-family: sans-serif;
+}
+
+.card {
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.card h2 {
+    color: #0056b3;
+    margin-top: 0;
+}
+
+.bloque-vuelo {
+    margin-bottom: 20px;
+}
+
+.bloque-vuelo h4 {
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.opcion-vuelo {
+    display: block;
+    border: 1px solid #ccc;
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    background: #fff;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.opcion-vuelo:hover {
+    background: #f9f9f9;
+    border-color: #0056b3;
+}
+
+/* Pasajeros y Planes */
+.card-pasajero {
+    border: 1px solid #0056b3;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.card-pasajero h3 {
+    margin-top: 0;
+    color: #0056b3;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+
+.tramo-tarifa {
+    margin-bottom: 15px;
+}
+
+.tramo-tarifa h4 {
+    margin: 5px 0;
+    color: #555;
+    font-size: 14px;
+}
+
+.grid-planes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+.opcion-plan {
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 6px;
+    background: #fafafa;
+    display: block;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.2s;
+}
+
+.opcion-plan:hover {
+    background: #f0f4f9;
+}
+
+.btn-continuar {
+    background: #0056b3;
+    color: #fff;
+    padding: 14px 30px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+    width: 100%;
+    transition: background 0.2s;
+}
+
+.btn-continuar:hover {
+    background: #004085;
+}
+
+/* Sidebar Resumen */
+.sidebar-resumen {
+    border: 1px solid #0056b3;
+    padding: 20px;
+    border-radius: 8px;
+    background: #f4f8ff;
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+}
+
+.sidebar-resumen h3 {
+    color: #0056b3;
+    border-bottom: 2px solid #0056b3;
+    padding-bottom: 10px;
+    margin-top: 0;
+}
+
+.detalle-dinamico {
+    font-size: 13px;
+    color: #444;
+    line-height: 1.6;
+}
+
+.separador {
+    border: 0;
+    border-top: 1px dashed #0056b3;
+    margin: 15px 0;
+}
+
+.total-contenedor {
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+    font-size: 18px;
+}
+
+.precio-verde {
+    color: green;
+    font-weight: bold;
+}
+
+/* =====================================================================
+   REESTILO MODERNO DEL PASO DE VUELOS
+   ===================================================================== */
+.contenedor-vuelos {
+    display: grid;
+    grid-template-columns: minmax(0, 2.1fr) minmax(280px, 0.9fr);
+    gap: 22px;
+    max-width: 1240px;
+    margin: 24px auto;
+    padding: 0 20px;
+}
+
+.hero-step {
+    background: linear-gradient(135deg, #0f2c59, #163c73);
+    color: #fff;
+}
+
+.hero-step h2,
+.hero-step p {
+    color: #fff;
+}
+
+.grid-vuelos,
+.grid-planes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px;
+}
+
+.opcion-vuelo,
+.opcion-plan {
+    border: 1px solid rgba(15, 44, 89, 0.1);
+    border-radius: 18px;
+    padding: 18px;
+    background: linear-gradient(180deg, #ffffff, #f8fbff);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 170px;
+}
+
+.opcion-vuelo:hover,
+.opcion-plan:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 30px rgba(15, 44, 89, 0.12);
+    border-color: #0d7fd4;
+}
+
+.opcion-vuelo input,
+.opcion-plan input {
+    align-self: flex-start;
+    accent-color: #0d7fd4;
+}
+
+.badge-vuelo {
+    align-self: flex-start;
+    display: inline-flex;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #e9f2ff;
+    color: #0d7fd4;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.precio-vuelo {
+    color: #0f2c59;
+    font-weight: 800;
+}
+
+.btn-continuar {
+    background: linear-gradient(90deg, #fec901, #ffdb4d);
+    color: #0f2c59;
+    border: none;
+    padding: 15px 28px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: 900;
+    width: 100%;
+    margin-top: 18px;
+    font-size: 16px;
+}
+
+.sidebar-resumen {
+    background: linear-gradient(180deg, #0f2c59, #163c73);
+    color: #f7fbff;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 22px;
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+}
+
+.sidebar-resumen h3,
+.sidebar-resumen p {
+    color: #f7fbff;
+}
+
+.sidebar-resumen .separador {
+    border-top-color: rgba(255, 255, 255, 0.22);
+}
+
+@media (max-width: 900px) {
+    .contenedor-vuelos {
+        grid-template-columns: 1fr;
+    }
+}
