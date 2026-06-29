@@ -133,3 +133,57 @@
     color: green;
     font-weight: bold;
 }
+
+/* =====================================================================
+   REESTILO MODERNO DEL PASO DE PASAJEROS
+   ===================================================================== */
+.contenedor-pasajeros {
+    display: grid;
+    grid-template-columns: minmax(0, 2.1fr) minmax(280px, 0.9fr);
+    gap: 22px;
+    max-width: 1240px;
+    margin: 24px auto;
+    padding: 0 20px;
+}
+
+.grid-inputs input {
+    border: 1px solid #d4ddeb;
+    border-radius: 14px;
+    padding: 12px 14px;
+    min-height: 48px;
+    background: #fff;
+}
+
+.btn-pago {
+    background: linear-gradient(90deg, #fec901, #ffdb4d);
+    color: #0f2c59;
+    border: none;
+    padding: 15px 28px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: 900;
+    width: 100%;
+    margin-top: 18px;
+    font-size: 16px;
+}
+
+.sidebar-resumen {
+    background: linear-gradient(180deg, #0f2c59, #163c73);
+    color: #f7fbff;
+    border-radius: 20px;
+    padding: 22px;
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+}
+
+.sidebar-resumen h3,
+.sidebar-resumen p {
+    color: #f7fbff;
+}
+
+@media (max-width: 900px) {
+    .contenedor-pasajeros {
+        grid-template-columns: 1fr;
+    }
+}

@@ -152,3 +152,156 @@
     color: green;
     font-weight: bold;
 }
+
+/* =====================================================================
+   REESTILO MODERNO DEL PASO DE VUELOS
+   ===================================================================== */
+.contenedor-vuelos {
+    display: grid;
+    grid-template-columns: minmax(0, 2.1fr) minmax(280px, 0.9fr);
+    gap: 22px;
+    max-width: 1240px;
+    margin: 24px auto;
+    padding: 0 20px;
+}
+
+.hero-step {
+    background: linear-gradient(135deg, #0f2c59, #163c73);
+    color: #fff;
+}
+
+.hero-step h2,
+.hero-step p {
+    color: #fff;
+}
+
+.grid-vuelos,
+.grid-planes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px;
+}
+
+.opcion-vuelo,
+.opcion-plan {
+    border: 1px solid rgba(15, 44, 89, 0.1);
+    border-radius: 18px;
+    padding: 18px;
+    background: linear-gradient(180deg, #ffffff, #f8fbff);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 170px;
+}
+
+.opcion-vuelo:hover,
+.opcion-plan:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 30px rgba(15, 44, 89, 0.12);
+    border-color: #0d7fd4;
+}
+
+.opcion-vuelo input,
+.opcion-plan input {
+    align-self: flex-start;
+    accent-color: #0d7fd4;
+}
+
+.badge-vuelo {
+    align-self: flex-start;
+    display: inline-flex;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #e9f2ff;
+    color: #0d7fd4;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.precio-vuelo {
+    color: #0f2c59;
+    font-weight: 800;
+}
+
+.btn-continuar {
+    background: linear-gradient(90deg, #fec901, #ffdb4d);
+    color: #0f2c59;
+    border: none;
+    padding: 15px 28px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: 900;
+    width: 100%;
+    margin-top: 18px;
+    font-size: 16px;
+}
+
+.sidebar-resumen {
+    background: linear-gradient(180deg, #0f2c59, #163c73);
+    color: #f7fbff;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 22px;
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+}
+
+.sidebar-resumen h3,
+.sidebar-resumen p {
+    color: #f7fbff;
+}
+
+.sidebar-resumen .separador {
+    border-top-color: rgba(255, 255, 255, 0.22);
+}
+
+@media (max-width: 900px) {
+    .contenedor-vuelos {
+        grid-template-columns: 1fr;
+    }
+}
+.promo-applied-card {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    padding: 18px;
+    margin-bottom: 18px;
+    border-top: 5px solid #ff9f1c;
+}
+
+.promo-code {
+    padding: 10px 12px;
+    border-radius: 999px;
+    background: #fff4df;
+    color: #9a5400;
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.status-pill.status-on-time { background: #dcfce7; color: #166534; }
+.status-pill.status-scheduled { background: #dbeafe; color: #1d4ed8; }
+.status-pill.status-delayed { background: #fef3c7; color: #92400e; }
+.status-pill.status-cancelled { background: #fee2e2; color: #b91c1c; }
+
+.precio-anterior {
+    color: #94a3b8;
+    text-decoration: line-through;
+}
+
+.empty-state {
+    padding: 24px;
+    border-radius: 16px;
+    background: #f8fbff;
+    text-align: center;
+}
+
+.empty-link {
+    display: inline-flex;
+    justify-content: center;
+    text-decoration: none;
+}

@@ -19,7 +19,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
             $_SESSION['usuario_id'] = $pdo->lastInsertId();
             $_SESSION['usuario_nombre'] = $nombre;
-            header("Location: ../../index.php");
+                $redirectAfterAuth = $_SESSION['redirect_after_auth'] ?? '../../index.php';
+                unset($_SESSION['redirect_after_auth']);
+                header("Location: $redirectAfterAuth");
             exit();
         } catch (\PDOException $e) {
             $error = ($e->getCode() == 23000) ? "El correo ya existe." : "Error: " . $e->getMessage();
@@ -40,5 +42,6 @@ include_once '../../includes/header.php';
         <button type="submit" class="btn-next">Registrarse</button>
     </form>
 </div>
+<?php include_once '../../includes/footer.php'; ?>
 </body>
 </html>

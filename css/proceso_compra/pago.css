@@ -136,3 +136,117 @@
     color: #218838;
     font-size: 18px;
 }
+
+/* =====================================================================
+   REESTILO MODERNO DEL PASO DE PAGO
+   ===================================================================== */
+.contenedor-pago {
+    display: grid;
+    grid-template-columns: minmax(0, 2.1fr) minmax(280px, 0.9fr);
+    gap: 22px;
+    max-width: 1240px;
+    margin: 24px auto;
+    padding: 0 20px;
+}
+
+.grupo-metodos {
+    margin: 15px 0;
+    display: grid;
+    gap: 12px;
+}
+
+.metodo-item {
+    cursor: pointer;
+    padding: 14px;
+    border: 1px solid #d4ddeb;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #f8fbff;
+}
+
+.inputs-tarjeta {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.inputs-tarjeta input {
+    border: 1px solid #d4ddeb;
+    border-radius: 14px;
+    padding: 12px 14px;
+    min-height: 48px;
+    background: #fff;
+}
+
+.btn-pagar {
+    background: linear-gradient(90deg, #00a896, #1ec7b4);
+    color: #fff;
+    border: none;
+    padding: 15px 28px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: 900;
+    width: 100%;
+    margin-top: 18px;
+    font-size: 16px;
+}
+
+.sidebar-resumen-final {
+    background: linear-gradient(180deg, #0f2c59, #163c73);
+    color: #f7fbff;
+    border-radius: 20px;
+    padding: 22px;
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+}
+
+.sidebar-resumen-final h3,
+.sidebar-resumen-final p {
+    color: #f7fbff;
+}
+
+.auth-card {
+    text-align: left;
+}
+
+.auth-help,
+.auth-note {
+    margin-top: 14px;
+    color: #5c6b7e;
+}
+
+.auth-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+}
+
+.auth-button {
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 180px;
+}
+
+.auth-button-secondary {
+    background: linear-gradient(90deg, #0d7fd4, #1da1f2);
+}
+
+@media (max-width: 900px) {
+    .contenedor-pago {
+        grid-template-columns: 1fr;
+    }
+
+    .auth-actions {
+        flex-direction: column;
+    }
+
+    .auth-button {
+        width: 100%;
+    }
+}

@@ -17,7 +17,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $_SESSION['usuario_id'] = $usuario['id_cliente'];
             $_SESSION['usuario_nombre'] = $usuario['nombre'];
-            header("Location: ../../index.php");
+                $redirectAfterAuth = $_SESSION['redirect_after_auth'] ?? '../../index.php';
+                unset($_SESSION['redirect_after_auth']);
+                header("Location: $redirectAfterAuth");
             exit();
         }
     } else {
@@ -36,5 +38,6 @@ include_once '../../includes/header.php';
         <button type="submit" class="btn-next">Ingresar</button>
     </form>
 </div>
+<?php include_once '../../includes/footer.php'; ?>
 </body>
 </html>

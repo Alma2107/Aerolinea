@@ -57,6 +57,7 @@ body { background-color: var(--light-bg); color: var(--dark-text); padding-botto
 .logo{
     font-size:24px;
     font-weight:bold;
+    
 }
 
 .menu-central{
@@ -335,4 +336,562 @@ body { background-color: var(--light-bg); color: var(--dark-text); padding-botto
 
 .slider-btn:hover{
     background:rgba(0,0,0,.8);
+}
+
+/* ========================================================================== 
+   12. REESTILO MODERNO DEL SITIO PRINCIPAL
+   ========================================================================== */
+body {
+    font-family: "Segoe UI", "Trebuchet MS", Arial, sans-serif;
+    background:
+        radial-gradient(circle at top left, rgba(15, 44, 89, 0.12), transparent 30%),
+        linear-gradient(180deg, #f7f9fc 0%, #eef4fb 100%);
+    color: #10233f;
+}
+
+.main-header {
+    background: linear-gradient(90deg, #0b2348 0%, #143b6f 50%, #0f2c59 100%);
+    box-shadow: 0 10px 30px rgba(7, 22, 45, 0.18);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.menu-central {
+    display: flex;
+    gap: 24px;
+}
+
+.menu-central a,
+.nav-menu .btn-nav,
+.nav-menu .user-welcome {
+    color: #f7fbff;
+}
+
+.nav-menu .btn-nav {
+    border-color: rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.nav-menu .btn-primary {
+    background: #00a896;
+    border-color: #00a896;
+}
+
+.nav-menu .btn-danger {
+    background: #e14b4b;
+    border-color: #e14b4b;
+}
+
+.hero-slider {
+    height: 540px;
+    border-bottom: 1px solid rgba(15, 44, 89, 0.08);
+}
+
+.slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: scale(1.02);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.slide.active {
+    opacity: 1;
+    transform: scale(1);
+    z-index: 2;
+}
+
+.slide::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(8, 18, 35, 0.7) 10%, rgba(8, 18, 35, 0.2) 65%, rgba(8, 18, 35, 0.05) 100%);
+}
+
+.slide-text {
+    z-index: 3;
+    max-width: 620px;
+    background: rgba(6, 15, 28, 0.42);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(10px);
+}
+
+.slider-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 46px;
+    height: 46px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.82);
+    color: #0f2c59;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 4;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.slider-btn.prev { left: 18px; }
+.slider-btn.next { right: 18px; }
+
+.quick-services,
+.travel-carousel-section,
+.recommended-trips,
+.about-us,
+.booking-layout {
+    max-width: 1240px;
+    margin: 0 auto 40px;
+    padding: 0 20px;
+}
+
+.quick-services {
+    margin-top: -42px;
+    position: relative;
+    z-index: 5;
+}
+
+.reservation-tools {
+    margin-top: 0;
+}
+
+.service-card,
+.card,
+.trip-card,
+.travel-card,
+.about-panel {
+    border: 1px solid rgba(15, 44, 89, 0.08);
+    box-shadow: 0 18px 45px rgba(15, 44, 89, 0.08);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.94);
+    
+}
+
+.service-card {
+    padding: 24px;
+    text-align: left;
+}
+
+.service-card p,
+.section-copy,
+.travel-card-overlay p,
+.trip-card p,
+.about-panel p {
+    color: #5c6b7e;
+}
+
+.card {
+    padding: 28px;
+}
+
+.eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 11px;
+    color: #0d7fd4;
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+
+.section-copy {
+    margin: 10px 0 20px;
+}
+
+.trip-type-selector {
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.trip-type-selector label {
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: #eef5ff;
+    color: #0f2c59;
+}
+
+.search-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.search-grid select,
+.search-grid input {
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 14px;
+    border: 1px solid #d4ddeb;
+    border-radius: 14px;
+    background: #fff;
+    color: #13253d;
+}
+
+.search-grid input[type="number"] {
+    max-width: 160px;
+}
+
+.btn-next {
+    background: linear-gradient(90deg, #fec901, #ffdb4d);
+    color: #0f2c59;
+    border-radius: 14px;
+    box-shadow: 0 14px 30px rgba(254, 201, 1, 0.25);
+    font-weight: 900;
+    letter-spacing: 0.02em;
+}
+
+.section-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 18px;
+}
+
+.section-heading h2 {
+    font-size: clamp(26px, 3vw, 40px);
+    line-height: 1.1;
+    color: #0f2c59;
+}
+
+.travel-carousel {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 18px;
+}
+
+.travel-card {
+    position: relative;
+    overflow: hidden;
+    min-height: 280px;
+}
+
+.travel-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.travel-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(8, 18, 35, 0.05), rgba(8, 18, 35, 0.8));
+}
+
+.travel-card-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    padding: 20px;
+    color: #fff;
+}
+
+.travel-card-overlay h3,
+.travel-card-overlay p {
+    color: #fff;
+}
+
+.travel-card-large {
+    min-height: 350px;
+}
+
+.travel-badge,
+.trip-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(8px);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.recommended-trips .trip-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.trip-card {
+    padding: 22px;
+    min-height: 240px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border-top: 5px solid #0d7fd4;
+}
+
+.trip-card img {
+    width: 100%;
+    height: 220px; /* todas tendrán la misma altura */
+    object-fit: cover;
+    display: block;
+    border-radius: 12px;
+}
+
+.trip-card ul,
+.about-panel ul {
+    padding-left: 18px;
+    color: #5c6b7e;
+}
+
+.trip-card-brasil { border-top-color: #009b3a; }
+.trip-card-argentina { border-top-color: #74acdf; }
+.trip-card-uruguay { border-top-color: #0c8fdc; }
+.trip-card-chile { border-top-color: #d63f31; }
+
+.about-us {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 18px;
+}
+
+.about-panel {
+    padding: 28px;
+}
+
+.about-panel-alt {
+    background: linear-gradient(180deg, #0f2c59, #163c73);
+    color: #f7fbff;
+}
+
+.about-panel-alt h3,
+.about-panel-alt p,
+.about-panel-alt li {
+    color: #f7fbff;
+}
+
+.about-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 20px;
+}
+
+.about-stats div {
+    padding: 16px;
+    border-radius: 16px;
+    background: rgba(15, 44, 89, 0.04);
+}
+
+.about-stats strong {
+    display: block;
+    font-size: 24px;
+    color: #0f2c59;
+}
+
+.about-stats span {
+    color: #5c6b7e;
+}
+
+@media (max-width: 1100px) {
+    .travel-carousel,
+    .recommended-trips .trip-grid,
+    .about-us {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .travel-card-large {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 768px) {
+    .quick-services,
+    .travel-carousel-section,
+    .recommended-trips,
+    .about-us,
+    .booking-layout {
+        padding: 0 14px;
+    }
+
+    .travel-carousel,
+    .recommended-trips .trip-grid,
+    .about-us,
+    .search-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-slider {
+        height: 460px;
+    }
+
+    .slide-text {
+        left: 18px;
+        right: 18px;
+        padding: 22px;
+    }
+
+    .slider-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+
+    .about-stats {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ========================================================================== 
+   13. FOOTER GLOBAL
+   ========================================================================== */
+html, body {
+    min-height: 100%;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+body > .footer {
+    margin-top: auto;
+}
+
+.footer {
+    background: linear-gradient(180deg, #0b2348, #081a34);
+    color: #f7fbff;
+    padding: 42px 20px 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.footer-contenido {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr 1fr 1fr;
+    gap: 28px;
+    max-width: 1240px;
+    margin: 0 auto;
+}
+
+.footer-col {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.footer-col h3 {
+    margin: 0;
+    color: #fec901;
+    font-size: 18px;
+}
+
+.footer-col p,
+.footer-col a,
+.footer-bottom p {
+    color: rgba(247, 251, 255, 0.84);
+    text-decoration: none;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.footer-col a:hover {
+    color: #fec901;
+}
+
+.redes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.redes a {
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.footer-bottom {
+    max-width: 1240px;
+    margin: 24px auto 0;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: center;
+}
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.navbar {
+    background: #1e3a8a;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+
+.logo {
+    font-size: 24px;
+}
+
+.menu {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+}
+
+.menu a {
+    color: white;
+    text-decoration: none;
+}
+
+.hamburguesa {
+    display: none;
+    font-size: 30px;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+}
+
+/* Celulares */
+@media (max-width: 768px) {
+    .hamburguesa {
+        display: block;
+    }
+
+    .menu {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 70px;
+        right: 0;
+        width: 200px;
+        background: #1e3a8a;
+        padding: 15px;
+        gap: 15px;
+    }
+
+    .menu.activo {
+        display: flex;
+    }
+}
+
+@media (max-width: 900px) {
+    .footer-contenido {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .footer-contenido {
+        grid-template-columns: 1fr;
+    }
 }

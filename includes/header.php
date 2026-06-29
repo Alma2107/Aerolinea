@@ -1,7 +1,10 @@
-<?php
+﻿<?php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+$pageStyles = $pageStyles ?? [];
+$pageStyles = is_array($pageStyles) ? $pageStyles : [$pageStyles];
 ?>
 
 <!DOCTYPE html>
@@ -9,22 +12,27 @@ if (session_status() === PHP_SESSION_NONE) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FlySmart - Aerolínea</title>
-    <link rel="stylesheet" href="/Aerolinea-Main/css/estilos.css">
+    <title>FlySmart - Aerolinea</title>
+    <link rel="stylesheet" href="/Aerolinea/css/estilos.css">
+    <?php foreach ($pageStyles as $pageStyle): ?>
+    <link rel="stylesheet" href="<?= htmlspecialchars($pageStyle, ENT_QUOTES, 'UTF-8') ?>">
+    <?php endforeach; ?>
 </head>
 <body>
 
 <header class="main-header">
 
     <div class="logo">
-        ✈️ FlySmart
+      <a href="/Aerolinea/index.php">FlySmart</a>
     </div>
 
     <nav class="menu-central">
-        <a href="/Aerolinea-Main/index.php">Inicio</a>
-        <a href="#destinos">Destinos</a>
-        <a href="#promociones">Promociones</a>
+        <a href="/Aerolinea/index.php">Inicio</a>
+        <a href="#promociones-funcionales">Promos</a>
+        <a href="#recomendados">Recomendados</a>
+        <a href="#nosotros">Nosotros</a>
         <a href="#servicios">Servicios</a>
+        <a href="/Aerolinea/consultas/reservas/mis_viajes.php">Mis viajes</a>
     </nav>
 
     <nav class="nav-menu">
@@ -34,25 +42,25 @@ if (session_status() === PHP_SESSION_NONE) {
                 Hola, <?= htmlspecialchars($_SESSION['usuario_nombre']) ?>
             </span>
 
-            <a href="/Aerolinea-Main/consultas/login/logout.php"
+                <a href="/Aerolinea/consultas/login/logout.php"
                class="btn-nav">
-               Cerrar Sesión
+               Cerrar Sesion
             </a>
 
-            <a href="/Aerolinea-Main/consultas/login/eliminar_cuenta.php"
+                <a href="/Aerolinea/consultas/login/eliminar_cuenta.php"
                class="btn-nav btn-danger"
-               onclick="return confirm('¿Estás seguro de eliminar tu cuenta?')">
+               onclick="return confirm('Â¿EstÃ¡s seguro de eliminar tu cuenta?')">
                Eliminar Cuenta
             </a>
-
+            
         <?php else: ?>
 
-            <a href="/Aerolinea-Main/consultas/login/login.php"
+                <a href="/Aerolinea/consultas/login/login.php"
                class="btn-nav">
-               Iniciar Sesión
+               Iniciar Sesion
             </a>
 
-            <a href="/Aerolinea-Main/consultas/login/registro.php"
+                <a href="/Aerolinea/consultas/login/registro.php"
                class="btn-nav btn-primary">
                Registrarse
             </a>
@@ -61,3 +69,4 @@ if (session_status() === PHP_SESSION_NONE) {
     </nav>
 
 </header>
+

@@ -1,6 +1,7 @@
 <?php
 require_once '../../config/conexion.php';
 session_start();
+$pageStyles = ['../../css/proceso_compra/servicios.css'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $_SESSION['equipajes'] = [];
@@ -74,8 +75,6 @@ for ($i = 1; $i <= $cantidad_pasajeros; $i++) {
 $servicios = $pdo->query("SELECT id_servicio, nombre_servicio, descripcion, precio_servicio FROM servicios_adicionales")->fetchAll(PDO::FETCH_ASSOC);
 include_once '../../includes/header.php';
 ?>
-
-<link rel="stylesheet" href="css/proceso_compra/servicios.css">
 
 <div class="contenedor-servicios">
     
@@ -151,5 +150,6 @@ include_once '../../includes/header.php';
 </div>
 
 <script src="js/proceso_compra/servicios.js"></script>
+<?php include_once '../../includes/footer.php'; ?>
 </body>
 </html>

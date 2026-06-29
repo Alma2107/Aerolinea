@@ -130,3 +130,156 @@
 .total-precio {
     color: green;
 }
+
+/* =====================================================================
+   REESTILO MODERNO DEL PASO DE EQUIPAJE
+   ===================================================================== */
+.contenedor-equipaje {
+    display: grid;
+    grid-template-columns: minmax(0, 2.1fr) minmax(280px, 0.9fr);
+    gap: 22px;
+    max-width: 1240px;
+    margin: 24px auto;
+    padding: 0 20px;
+}
+
+.hero-equipaje {
+    background: linear-gradient(135deg, #0f2c59, #1b4a8a);
+    color: #fff;
+}
+
+.hero-equipaje h2,
+.hero-equipaje p,
+.hero-equipaje .text-inclusion {
+    color: #fff;
+}
+
+.grid-equipajes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.equipaje-card {
+    border: 1px solid rgba(15, 44, 89, 0.1);
+    border-radius: 20px;
+    padding: 18px;
+    background: linear-gradient(180deg, #ffffff, #f7fbff);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    min-height: 280px;
+}
+
+.equipaje-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 30px rgba(15, 44, 89, 0.12);
+}
+
+.equipaje-card input {
+    accent-color: #0d7fd4;
+    align-self: flex-start;
+}
+
+.equipaje-thumb {
+    width: 100%;
+    min-height: 112px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 42px;
+    background: linear-gradient(135deg, #dceeff, #f7fbff);
+}
+
+.equipaje-mochila .equipaje-thumb { background: linear-gradient(135deg, #d8f3dc, #f7fbff); }
+.equipaje-mano .equipaje-thumb { background: linear-gradient(135deg, #dceeff, #f7fbff); }
+.equipaje-bodega-chica .equipaje-thumb { background: linear-gradient(135deg, #ffe8cc, #fffaf2); }
+.equipaje-bodega-standar .equipaje-thumb { background: linear-gradient(135deg, #e4ddff, #faf8ff); }
+.equipaje-bodega-pesada .equipaje-thumb { background: linear-gradient(135deg, #ffd6d6, #fff9f9); }
+.equipaje-especial .equipaje-thumb { background: linear-gradient(135deg, #d8fff6, #f7fffd); }
+
+.equipaje-card h4 {
+    font-size: 17px;
+    line-height: 1.2;
+    color: #0f2c59;
+}
+
+.equipaje-action {
+    margin-top: auto;
+    align-self: flex-start;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: #eef5ff;
+    color: #0d7fd4;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.btn-continuar {
+    background: linear-gradient(90deg, #fec901, #ffdb4d);
+    color: #0f2c59;
+    border: none;
+    padding: 15px 28px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: 900;
+    width: 100%;
+    margin-top: 18px;
+    font-size: 16px;
+}
+
+.sidebar-resumen {
+    background: linear-gradient(180deg, #0f2c59, #163c73);
+    color: #f7fbff;
+    border-radius: 20px;
+    padding: 22px;
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+}
+
+.sidebar-resumen h3,
+.sidebar-resumen p {
+    color: #f7fbff;
+}
+
+@media (max-width: 900px) {
+    .contenedor-equipaje {
+        grid-template-columns: 1fr;
+    }
+}
+.promo-applied-card {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    padding: 18px;
+    margin-bottom: 18px;
+    background: #fff;
+    border-radius: 20px;
+    border-top: 5px solid #ff9f1c;
+    box-shadow: 0 18px 45px rgba(15, 44, 89, 0.08);
+}
+
+.promo-code {
+    padding: 10px 12px;
+    border-radius: 999px;
+    background: #fff4df;
+    color: #9a5400;
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.promo-free-bag {
+    border-color: #ff9f1c;
+    box-shadow: 0 16px 30px rgba(255, 159, 28, 0.16);
+}
+
+.precio-promo {
+    color: #166534;
+    font-weight: 900;
+}

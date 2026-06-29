@@ -72,4 +72,7 @@ foreach ($aviones as $avion) {
 }
 
 echo "<h3>🎉 ¡PROCESO TERMINADO! Ya no tenés que cargar nada más a mano.</h3>";
+echo "</div>";
+include_once 'includes/footer.php';
+echo "</body></html>";
 ?>

@@ -1,0 +1,371 @@
+.reservation-tools,
+.reservation-page {
+    max-width: 1240px;
+    margin: 0 auto 40px;
+    padding: 0 20px;
+}
+
+.reservation-tools {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.reservation-tool,
+.reservation-card,
+.ticket-summary,
+.history-item,
+.boarding-pass {
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(15, 44, 89, 0.08);
+    border-radius: 20px;
+    box-shadow: 0 18px 45px rgba(15, 44, 89, 0.08);
+}
+
+.reservation-tool {
+    padding: 26px;
+    border-top: 5px solid #ff9f1c;
+}
+
+.reservation-tool-history {
+    border-top-color: #00a896;
+}
+
+.reservation-tool p,
+.reservation-card p,
+.ticket-details p,
+.history-item p,
+.boarding-qr p {
+    color: #5c6b7e;
+}
+
+.reservation-form,
+.reservation-search {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+}
+
+.reservation-form input,
+.reservation-search input {
+    flex: 1;
+    min-width: 220px;
+    min-height: 48px;
+    padding: 12px 14px;
+    border: 1px solid #d4ddeb;
+    border-radius: 14px;
+    text-transform: uppercase;
+}
+
+.btn-orange {
+    background: linear-gradient(90deg, #ff8a00, #ffb347);
+    color: #10233f;
+    box-shadow: 0 14px 30px rgba(255, 159, 28, 0.22);
+}
+
+.reservation-page {
+    margin-top: 28px;
+}
+
+.reservation-card {
+    padding: 28px;
+    margin-bottom: 20px;
+}
+
+.reservation-empty {
+    text-align: center;
+}
+
+.ticket-summary {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    overflow: hidden;
+}
+
+.ticket-main {
+    padding: 30px;
+    background: linear-gradient(135deg, #0f2c59, #143b6f);
+    color: #fff;
+}
+
+.ticket-main h2,
+.ticket-main p {
+    color: #fff;
+}
+
+.ticket-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 800;
+}
+
+.route-line {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 14px;
+    margin: 26px 0;
+}
+
+.route-line strong {
+    font-size: 34px;
+}
+
+.route-line span {
+    height: 2px;
+    background: #ff9f1c;
+}
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: #fff4df;
+    color: #9a5400;
+    font-size: 12px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.ticket-details {
+    padding: 30px;
+    display: grid;
+    gap: 10px;
+}
+
+.history-list {
+    display: grid;
+    gap: 14px;
+}
+
+.history-item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 18px;
+    padding: 22px;
+}
+
+.history-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.boarding-pass {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 260px;
+    overflow: hidden;
+}
+
+.boarding-info {
+    padding: 32px;
+}
+
+.boarding-route {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin: 26px 0;
+}
+
+.boarding-route span,
+.boarding-grid strong {
+    display: block;
+    color: #5c6b7e;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.boarding-route strong {
+    display: block;
+    color: #0f2c59;
+    font-size: 44px;
+}
+
+.boarding-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.boarding-grid p {
+    padding: 14px;
+    border-radius: 14px;
+    background: #f7f9fc;
+}
+
+.boarding-qr {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 28px;
+    background: #fff4df;
+    text-align: center;
+}
+
+.boarding-qr img {
+    width: 180px;
+    height: 180px;
+    background: #fff;
+    padding: 8px;
+    border-radius: 16px;
+}
+
+@media print {
+    .main-header,
+    .footer,
+    .boarding-qr button {
+        display: none;
+    }
+
+    body {
+        background: #fff;
+    }
+
+    .reservation-page {
+        margin: 0;
+        max-width: none;
+    }
+
+    .boarding-pass {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+}
+
+@media (max-width: 850px) {
+    .reservation-tools,
+    .ticket-summary,
+    .history-item,
+    .boarding-pass,
+    .boarding-route,
+    .boarding-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .history-actions {
+        align-items: flex-start;
+    }
+}
+
+/* Estados de vuelo y acciones */
+.status-on-time { background: #dcfce7; color: #166534; }
+.status-scheduled { background: #dbeafe; color: #1d4ed8; }
+.status-delayed { background: #fef3c7; color: #92400e; }
+.status-cancelled { background: #fee2e2; color: #b91c1c; }
+
+.service-card-link,
+.promo-card-link {
+    color: inherit;
+    text-decoration: none;
+}
+
+.unified-trips {
+    align-items: stretch;
+}
+
+.client-panel-hero,
+.dashboard-card,
+.promo-applied-card {
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(15, 44, 89, 0.08);
+    border-radius: 20px;
+    box-shadow: 0 18px 45px rgba(15, 44, 89, 0.08);
+}
+
+.client-panel-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
+    gap: 18px;
+    align-items: center;
+    padding: 30px;
+    margin-bottom: 20px;
+    border-top: 5px solid #ff9f1c;
+}
+
+.compact-search {
+    margin-top: 0;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+.dashboard-card {
+    padding: 24px;
+}
+
+.next-flight-card {
+    background: linear-gradient(135deg, #0f2c59, #163c73);
+    color: #fff;
+}
+
+.next-flight-card h2,
+.next-flight-card p {
+    color: #fff;
+}
+
+.mini-promo-list,
+.action-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.mini-promo-list a {
+    padding: 10px 12px;
+    border-radius: 999px;
+    background: #fff4df;
+    color: #9a5400;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 12px;
+}
+
+.travel-action-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.travel-action-card:hover,
+.service-card-link:hover,
+.promo-card-link:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 18px 45px rgba(15, 44, 89, 0.14);
+}
+
+.btn-danger-action {
+    background: #fee2e2;
+    color: #b91c1c;
+    box-shadow: none;
+}
+
+.skeleton-line {
+    min-height: 14px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #eef2f7, #ffffff, #eef2f7);
+    background-size: 200% 100%;
+    animation: skeleton-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+}
+
+@media (max-width: 850px) {
+    .client-panel-hero,
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -357,3 +357,26 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+-- --------------------------------------------------------
+-- Estructura de tabla para promociones funcionales
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `promociones` (
+  `id_promocion` int(11) NOT NULL AUTO_INCREMENT,
+  `codigo` varchar(30) NOT NULL,
+  `titulo` varchar(120) NOT NULL,
+  `descripcion` text DEFAULT NULL,
+  `tipo_beneficio` varchar(40) NOT NULL,
+  `valor_beneficio` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `destino_iata` varchar(3) DEFAULT NULL,
+  `min_pasajeros` int(11) NOT NULL DEFAULT 1,
+  `activa` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id_promocion`),
+  UNIQUE KEY `codigo` (`codigo`),
+  KEY `destino_iata` (`destino_iata`),
+  CONSTRAINT `fk_promociones_destino` FOREIGN KEY (`destino_iata`) REFERENCES `aeropuertos` (`codigo_iata`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO `promociones` (`codigo`, `titulo`, `descripcion`, `tipo_beneficio`, `valor_beneficio`, `destino_iata`, `min_pasajeros`, `activa`) VALUES
+('BARILO20', '20% OFF en Bariloche', 'Aplica descuento a vuelos con destino Bariloche.', 'porcentaje', 20.00, 'BRC', 1, 1),
+('EQUIPAJEGRATIS', 'Equipaje gratis', 'Agrega una valija promocional durante la compra.', 'equipaje_gratis', 1.00, NULL, 1, 1),
+('CORDOBA2X1', '2x1 a Cordoba', 'Beneficio para dos pasajeros hacia Cordoba.', '2x1', 50.00, 'COR', 2, 1);

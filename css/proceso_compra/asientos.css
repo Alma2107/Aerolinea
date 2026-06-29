@@ -234,3 +234,91 @@
 .total-precio {
     color: green;
 }
+
+/* =====================================================================
+   REESTILO MODERNO DEL PASO DE ASIENTOS
+   ===================================================================== */
+.contenedor-asientos {
+    display: grid;
+    grid-template-columns: minmax(0, 2.1fr) minmax(280px, 0.9fr);
+    gap: 22px;
+    max-width: 1240px;
+    margin: 24px auto;
+    padding: 0 20px;
+}
+
+.mapa-asientos {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(84px, 1fr));
+    gap: 14px;
+    justify-content: center;
+    margin-top: 18px;
+}
+
+.asiento-box {
+    min-height: 88px;
+    border-radius: 18px;
+    padding: 12px 10px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    font-size: 12px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    user-select: none;
+}
+
+.asiento-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 25px rgba(15, 44, 89, 0.12);
+}
+
+.asiento-box.selected {
+    outline: 3px solid rgba(13, 127, 212, 0.25);
+    transform: translateY(-2px) scale(1.02);
+}
+
+.cabina-scroll {
+    max-height: 620px;
+    overflow-y: auto;
+}
+
+.sidebar-resumen {
+    background: linear-gradient(180deg, #0f2c59, #163c73);
+    color: #f7fbff;
+    border-radius: 20px;
+    padding: 22px;
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+}
+
+.sidebar-resumen h3,
+.sidebar-resumen p,
+.sidebar-resumen span.destacado {
+    color: #f7fbff;
+}
+
+.btn-continuar {
+    background: linear-gradient(90deg, #fec901, #ffdb4d);
+    color: #0f2c59;
+    border: none;
+    padding: 15px 28px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: 900;
+    width: 100%;
+    margin-top: 18px;
+    font-size: 16px;
+}
+
+@media (max-width: 900px) {
+    .contenedor-asientos {
+        grid-template-columns: 1fr;
+    }
+
+    .mapa-asientos {
+        grid-template-columns: repeat(2, minmax(84px, 1fr));
+    }
+}

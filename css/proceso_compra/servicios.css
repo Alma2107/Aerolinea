@@ -121,3 +121,46 @@
 .total-precio {
     color: green;
 }
+
+/* =====================================================================
+   AFINADO VISUAL DEL PASO DE SERVICIOS
+   ===================================================================== */
+.contenedor-servicios {
+    grid-template-columns: minmax(0, 2.1fr) minmax(280px, 0.9fr);
+    max-width: 1240px;
+}
+
+.item-servicio {
+    border: 1px solid rgba(15, 44, 89, 0.08);
+    border-radius: 16px;
+    background: linear-gradient(180deg, #ffffff, #f7fbff);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.item-servicio:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px rgba(15, 44, 89, 0.1);
+}
+
+.label-servicio {
+    align-items: flex-start;
+}
+
+.btn-continuar {
+    background: linear-gradient(90deg, #fec901, #ffdb4d);
+    color: #0f2c59;
+    border: none;
+    padding: 15px 28px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: 900;
+    width: 100%;
+    margin-top: 18px;
+    font-size: 16px;
+}
+
+@media (max-width: 900px) {
+    .contenedor-servicios {
+        grid-template-columns: 1fr;
+    }
+}

@@ -50,7 +50,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['usuario_nombre']   = $nombre;
             $_SESSION['usuario_apellido'] = $apellido;
 
-            header("Location: ../../index.php");
+            $redirectAfterAuth = $_SESSION['redirect_after_auth'] ?? '../../index.php';
+            unset($_SESSION['redirect_after_auth']);
+            header("Location: $redirectAfterAuth");
             exit;
 
         } catch (PDOException $e) {
@@ -87,7 +89,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['usuario_nombre']   = $cliente['nombre'];
                 $_SESSION['usuario_apellido'] = $cliente['apellido'];
 
-                header("Location: ../../index.php");
+                $redirectAfterAuth = $_SESSION['redirect_after_auth'] ?? '../../index.php';
+                unset($_SESSION['redirect_after_auth']);
+                header("Location: $redirectAfterAuth");
                 exit;
             } else {
                 $_SESSION['error'] = "El correo o la contraseña son incorrectos.";
