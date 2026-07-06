@@ -23,8 +23,7 @@ $stmt = $pdo->prepare("
 $stmt->execute(['pnr' => $pnr]);
 $ticket = $stmt->fetch(PDO::FETCH_ASSOC);
 
-$pasajeUrl = 'http://' . $_SERVER['HTTP_HOST'] . '/Aerolinea/consultas/reservas/pasaje.php?pnr=' . urlencode($pnr);
-$qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' . urlencode($pasajeUrl);
+$codigoEmbarque = trim(chunk_split($pnr, 1, ' '));
 ?>
 
 <main class="reservation-page">
@@ -67,8 +66,8 @@ $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' . urle
             </div>
 
             <aside class="boarding-qr">
-                <img src="<?= htmlspecialchars($qrUrl, ENT_QUOTES, 'UTF-8') ?>" alt="Código QR del pasaje">
-                <p>Escaneá para abrir este pasaje.</p>
+                <div class="local-boarding-code" aria-label="Codigo de embarque"><?= htmlspecialchars($codigoEmbarque, ENT_QUOTES, 'UTF-8') ?></div>
+                <p>Usa este codigo en FlySmart para consultar o validar tu pasaje.</p>
                 <button type="button" class="btn-next btn-orange" onclick="window.print()">Descargar / imprimir</button>
             </aside>
         </section>

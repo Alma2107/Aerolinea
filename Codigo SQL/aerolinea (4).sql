@@ -91,6 +91,25 @@ INSERT INTO `clientes` (`id_cliente`, `nombre`, `apellido`, `email`, `telefono`,
 (10, 'Laura', 'Álvarez', 'laura.alvarez@live.com.ar', '+542944552211', 'hash_10', 1);
 
 -- --------------------------------------------------------
+-- Estructura de tabla para la tabla `comentarios`
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `comentarios` (
+  `id_comentario` int(11) NOT NULL AUTO_INCREMENT,
+  `id_cliente` int(11) NOT NULL,
+  `comentario` text NOT NULL,
+  `fecha_creacion` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_comentario`),
+  KEY `id_cliente` (`id_cliente`),
+  CONSTRAINT `fk_comentarios_cliente` FOREIGN KEY (`id_cliente`) REFERENCES `clientes` (`id_cliente`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Ejemplos de opiniones recientes
+INSERT INTO `comentarios` (`id_cliente`, `comentario`) VALUES
+(1, 'Muy buena experiencia. El vuelo salió a horario y el proceso de reserva fue claro.'),
+(2, 'La atención fue excelente y la compra en pesos argentinos me resultó muy práctica.'),
+(5, 'El sitio es muy fácil de usar y encontré un vuelo directo para mi viaje.');
+
+-- --------------------------------------------------------
 -- Estructura de tabla para la tabla `metodos_pago`
 -- --------------------------------------------------------
 CREATE TABLE `metodos_pago` (
@@ -380,3 +399,113 @@ INSERT INTO `promociones` (`codigo`, `titulo`, `descripcion`, `tipo_beneficio`, 
 ('BARILO20', '20% OFF en Bariloche', 'Aplica descuento a vuelos con destino Bariloche.', 'porcentaje', 20.00, 'BRC', 1, 1),
 ('EQUIPAJEGRATIS', 'Equipaje gratis', 'Agrega una valija promocional durante la compra.', 'equipaje_gratis', 1.00, NULL, 1, 1),
 ('CORDOBA2X1', '2x1 a Cordoba', 'Beneficio para dos pasajeros hacia Cordoba.', '2x1', 50.00, 'COR', 2, 1);
+
+-- --------------------------------------------------------
+-- Datos ampliados para demo profesional de FlySmart
+-- --------------------------------------------------------
+INSERT IGNORE INTO `aeropuertos` (`codigo_iata`, `nombre`, `ciudad`, `pais`) VALUES
+('ROS', 'Aeropuerto Internacional Rosario', 'Rosario', 'Argentina'),
+('USH', 'Aeropuerto Internacional Malvinas Argentinas', 'Ushuaia', 'Argentina'),
+('SLA', 'Aeropuerto Internacional Martin Miguel de Guemes', 'Salta', 'Argentina'),
+('JUJ', 'Aeropuerto Internacional Gobernador Horacio Guzman', 'Jujuy', 'Argentina'),
+('IGR', 'Aeropuerto Internacional Cataratas del Iguazu', 'Iguazu', 'Argentina'),
+('FTE', 'Aeropuerto Internacional El Calafate', 'El Calafate', 'Argentina'),
+('NQN', 'Aeropuerto Presidente Peron', 'Neuquen', 'Argentina'),
+('MDQ', 'Aeropuerto Astor Piazzolla', 'Mar del Plata', 'Argentina'),
+('PSS', 'Aeropuerto Libertador General San Martin', 'Posadas', 'Argentina'),
+('REL', 'Aeropuerto Almirante Zar', 'Trelew', 'Argentina'),
+('CRD', 'Aeropuerto General Mosconi', 'Comodoro Rivadavia', 'Argentina'),
+('UAQ', 'Aeropuerto Domingo Faustino Sarmiento', 'San Juan', 'Argentina'),
+('LUQ', 'Aeropuerto Brigadier Mayor Cesar Ojeda', 'San Luis', 'Argentina'),
+('IRJ', 'Aeropuerto Capitan Vicente Almandos Almonacid', 'La Rioja', 'Argentina'),
+('CTC', 'Aeropuerto Coronel Felipe Varela', 'Catamarca', 'Argentina'),
+('RES', 'Aeropuerto Internacional Resistencia', 'Resistencia', 'Argentina'),
+('CNQ', 'Aeropuerto Internacional Corrientes', 'Corrientes', 'Argentina'),
+('SFN', 'Aeropuerto Sauce Viejo', 'Santa Fe', 'Argentina'),
+('TUC', 'Aeropuerto Teniente Benjamin Matienzo', 'Tucuman', 'Argentina'),
+('RGL', 'Aeropuerto Internacional Piloto Civil Norberto Fernandez', 'Rio Gallegos', 'Argentina'),
+('RGA', 'Aeropuerto Internacional Gobernador Ramon Trejo Noel', 'Rio Grande', 'Argentina'),
+('MVD', 'Aeropuerto Internacional de Carrasco', 'Montevideo', 'Uruguay'),
+('ASU', 'Aeropuerto Internacional Silvio Pettirossi', 'Asuncion', 'Paraguay'),
+('LIM', 'Aeropuerto Internacional Jorge Chavez', 'Lima', 'Peru'),
+('FLN', 'Aeropuerto Internacional Hercilio Luz', 'Florianopolis', 'Brasil'),
+('PUJ', 'Aeropuerto Internacional Punta Cana', 'Punta Cana', 'Republica Dominicana'),
+('BCN', 'Aeropuerto Josep Tarradellas Barcelona-El Prat', 'Barcelona', 'Espana'),
+('FCO', 'Aeropuerto Leonardo da Vinci-Fiumicino', 'Roma', 'Italia'),
+('CDG', 'Aeropuerto Charles de Gaulle', 'Paris', 'Francia'),
+('JFK', 'Aeropuerto Internacional John F. Kennedy', 'Nueva York', 'Estados Unidos'),
+('CUN', 'Aeropuerto Internacional de Cancun', 'Cancun', 'Mexico'),
+('MEX', 'Aeropuerto Internacional Benito Juarez', 'Mexico DF', 'Mexico'),
+('BOG', 'Aeropuerto Internacional El Dorado', 'Bogota', 'Colombia'),
+('PTY', 'Aeropuerto Internacional de Tocumen', 'Panama', 'Panama');
+
+CREATE TABLE IF NOT EXISTS `asientos_avion` (
+  `id_asiento_avion` int(11) NOT NULL AUTO_INCREMENT,
+  `id_avion` int(11) NOT NULL,
+  `numero_asiento` varchar(10) NOT NULL,
+  `categoria` varchar(50) NOT NULL,
+  `cargo_extra` decimal(10,2) NOT NULL DEFAULT 0.00,
+  PRIMARY KEY (`id_asiento_avion`),
+  UNIQUE KEY `avion_asiento` (`id_avion`, `numero_asiento`),
+  CONSTRAINT `fk_asientos_avion` FOREIGN KEY (`id_avion`) REFERENCES `aviones` (`id_avion`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS `reservas_cancelaciones` (
+  `id_cancelacion` int(11) NOT NULL AUTO_INCREMENT,
+  `codigo_reserva_pnr` varchar(6) NOT NULL,
+  `id_cliente` int(11) DEFAULT NULL,
+  `fecha_solicitud` datetime NOT NULL,
+  `estado` varchar(30) NOT NULL DEFAULT 'Solicitada',
+  `motivo` varchar(180) DEFAULT NULL,
+  PRIMARY KEY (`id_cancelacion`),
+  UNIQUE KEY `reserva_unica` (`codigo_reserva_pnr`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT IGNORE INTO `asientos_avion` (`id_avion`, `numero_asiento`, `categoria`, `cargo_extra`) VALUES
+(1, '1A', 'Business', 12000.00), (1, '1B', 'Business', 12000.00), (1, '1C', 'Business', 12000.00), (1, '2A', 'Premium Economy', 6500.00), (1, '2B', 'Premium Economy', 6500.00), (1, '2C', 'Premium Economy', 6500.00), (1, '10A', 'Estandar', 0.00), (1, '10B', 'Estandar', 0.00), (1, '10C', 'Estandar', 0.00), (1, '11A', 'Estandar', 0.00), (1, '11B', 'Estandar', 0.00), (1, '11C', 'Estandar', 0.00),
+(2, '1A', 'Business', 12000.00), (2, '1B', 'Business', 12000.00), (2, '2A', 'Premium Economy', 6500.00), (2, '2B', 'Premium Economy', 6500.00), (2, '12A', 'Estandar', 0.00), (2, '12B', 'Estandar', 0.00), (2, '12C', 'Estandar', 0.00), (2, '15A', 'Estandar', 0.00), (2, '15B', 'Estandar', 0.00), (2, '15C', 'Estandar', 0.00),
+(3, '1A', 'Business', 18000.00), (3, '1B', 'Business', 18000.00), (3, '5A', 'Premium Economy', 9000.00), (3, '5B', 'Premium Economy', 9000.00), (3, '20A', 'Estandar', 0.00), (3, '20B', 'Estandar', 0.00), (3, '20C', 'Estandar', 0.00),
+(5, '1A', 'Business', 15000.00), (5, '2A', 'Premium Economy', 7500.00), (5, '9A', 'Estandar', 0.00), (5, '9B', 'Estandar', 0.00), (5, '9C', 'Estandar', 0.00),
+(8, '1A', 'Premium Economy', 5000.00), (8, '1B', 'Premium Economy', 5000.00), (8, '8A', 'Estandar', 0.00), (8, '8B', 'Estandar', 0.00), (8, '8C', 'Estandar', 0.00);
+
+INSERT INTO `vuelos` (`numero_vuelo`, `id_avion`, `origen_iata`, `destino_iata`, `fecha_salida`, `fecha_llegada`, `precio_base_vuelo`, `estado_vuelo`) VALUES
+('FS2001', 8, 'AEP', 'ROS', '2026-07-12 07:15:00', '2026-07-12 08:05:00', 28000.00, 'Programado'),
+('FS2002', 8, 'ROS', 'AEP', '2026-07-12 19:40:00', '2026-07-12 20:30:00', 28000.00, 'Programado'),
+('FS2003', 1, 'AEP', 'MDZ', '2026-07-13 09:10:00', '2026-07-13 11:05:00', 52000.00, 'Programado'),
+('FS2004', 1, 'MDZ', 'AEP', '2026-07-18 18:25:00', '2026-07-18 20:15:00', 54000.00, 'Programado'),
+('FS2005', 1, 'AEP', 'USH', '2026-07-14 06:50:00', '2026-07-14 10:35:00', 98000.00, 'Programado'),
+('FS2006', 1, 'USH', 'AEP', '2026-07-21 15:30:00', '2026-07-21 19:10:00', 102000.00, 'Programado'),
+('FS2007', 8, 'AEP', 'SLA', '2026-07-15 08:20:00', '2026-07-15 10:35:00', 62000.00, 'Programado'),
+('FS2008', 8, 'SLA', 'JUJ', '2026-07-15 12:05:00', '2026-07-15 12:45:00', 26000.00, 'Programado'),
+('FS2009', 8, 'AEP', 'IGR', '2026-07-16 10:00:00', '2026-07-16 11:50:00', 59000.00, 'Programado'),
+('FS2010', 8, 'IGR', 'AEP', '2026-07-20 17:10:00', '2026-07-20 19:00:00', 61000.00, 'Programado'),
+('FS2011', 1, 'AEP', 'FTE', '2026-07-17 05:55:00', '2026-07-17 09:10:00', 105000.00, 'Programado'),
+('FS2012', 1, 'FTE', 'BRC', '2026-07-19 14:20:00', '2026-07-19 16:05:00', 69000.00, 'Programado'),
+('FS2013', 8, 'AEP', 'NQN', '2026-07-18 11:15:00', '2026-07-18 13:10:00', 56000.00, 'Programado'),
+('FS2014', 8, 'AEP', 'MDQ', '2026-07-19 08:00:00', '2026-07-19 08:55:00', 24000.00, 'Programado'),
+('FS2015', 8, 'AEP', 'PSS', '2026-07-20 13:45:00', '2026-07-20 15:25:00', 48000.00, 'Programado'),
+('FS2016', 1, 'AEP', 'REL', '2026-07-21 07:35:00', '2026-07-21 09:50:00', 76000.00, 'Programado'),
+('FS2017', 1, 'REL', 'CRD', '2026-07-21 11:05:00', '2026-07-21 12:15:00', 42000.00, 'Programado'),
+('FS2018', 8, 'AEP', 'UAQ', '2026-07-22 09:25:00', '2026-07-22 11:15:00', 52000.00, 'Programado'),
+('FS2019', 8, 'AEP', 'LUQ', '2026-07-22 15:15:00', '2026-07-22 16:55:00', 50000.00, 'Programado'),
+('FS2020', 8, 'AEP', 'IRJ', '2026-07-23 06:45:00', '2026-07-23 08:35:00', 51000.00, 'Programado'),
+('FS2021', 8, 'AEP', 'CTC', '2026-07-23 12:20:00', '2026-07-23 14:05:00', 50000.00, 'Programado'),
+('FS2022', 8, 'AEP', 'RES', '2026-07-24 07:10:00', '2026-07-24 08:45:00', 43000.00, 'Programado'),
+('FS2023', 8, 'RES', 'CNQ', '2026-07-24 10:10:00', '2026-07-24 10:45:00', 22000.00, 'Programado'),
+('FS2024', 8, 'AEP', 'SFN', '2026-07-25 08:35:00', '2026-07-25 09:35:00', 30000.00, 'Programado'),
+('FS2025', 1, 'AEP', 'TUC', '2026-07-25 16:30:00', '2026-07-25 18:25:00', 57000.00, 'Programado'),
+('FS2026', 1, 'AEP', 'RGL', '2026-07-26 06:15:00', '2026-07-26 09:35:00', 99000.00, 'Programado'),
+('FS2027', 1, 'RGL', 'RGA', '2026-07-26 11:00:00', '2026-07-26 12:10:00', 45000.00, 'Programado'),
+('FS3001', 5, 'AEP', 'MVD', '2026-07-27 09:00:00', '2026-07-27 09:55:00', 39000.00, 'Programado'),
+('FS3002', 5, 'EZE', 'ASU', '2026-07-27 13:40:00', '2026-07-27 15:35:00', 68000.00, 'Programado'),
+('FS3003', 5, 'EZE', 'LIM', '2026-07-28 07:30:00', '2026-07-28 12:15:00', 125000.00, 'Programado'),
+('FS3004', 5, 'EZE', 'FLN', '2026-07-28 16:10:00', '2026-07-28 18:15:00', 82000.00, 'Programado'),
+('FS3005', 3, 'EZE', 'PUJ', '2026-08-03 23:10:00', '2026-08-04 07:35:00', 210000.00, 'Programado'),
+('FS3006', 3, 'EZE', 'BCN', '2026-08-05 12:15:00', '2026-08-06 05:55:00', 245000.00, 'Programado'),
+('FS3007', 3, 'EZE', 'FCO', '2026-08-06 13:05:00', '2026-08-07 07:20:00', 252000.00, 'Programado'),
+('FS3008', 3, 'EZE', 'CDG', '2026-08-07 14:45:00', '2026-08-08 08:10:00', 265000.00, 'Programado'),
+('FS3009', 3, 'EZE', 'JFK', '2026-08-08 21:30:00', '2026-08-09 07:40:00', 235000.00, 'Programado'),
+('FS3010', 3, 'EZE', 'CUN', '2026-08-09 08:20:00', '2026-08-09 17:30:00', 220000.00, 'Programado'),
+('FS3011', 3, 'EZE', 'MEX', '2026-08-10 09:40:00', '2026-08-10 19:10:00', 230000.00, 'Programado'),
+('FS3012', 5, 'EZE', 'BOG', '2026-08-11 10:15:00', '2026-08-11 16:35:00', 165000.00, 'Programado'),
+('FS3013', 5, 'EZE', 'PTY', '2026-08-12 11:30:00', '2026-08-12 18:20:00', 175000.00, 'Programado');

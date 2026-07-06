@@ -5,18 +5,49 @@ session_start();
 $pageStyles = ['../../css/proceso_compra/asientos.css'];
 
 if($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $_SESSION['equipajes_elegidos'] = $_POST['servicios'] ?? [];
+    $_SESSION['servicios_elegidos'] = [];
+    foreach ($_POST['servicios_elegidos'] ?? [] as $pasajero => $serviciosPasajero) {
+        $_SESSION['servicios_elegidos'][(int)$pasajero] = array_map('intval', (array)$serviciosPasajero);
+    }
     $_SESSION['id_asiento'] = $_POST['id_asiento'] ?? null;
 }
 
-$asientos = $pdo->query("SELECT id_asiento_avion, numero_asiento, categoria, cargo_extra FROM asientos_avion")->fetchAll();
+$idsVuelos = $_SESSION['id_vuelo'] ?? [];
+$idsVuelos = is_array($idsVuelos) ? array_map('intval', $idsVuelos) : [(int)$idsVuelos];
+$idsVuelos = array_values(array_filter($idsVuelos));
+$idVueloReferencia = $idsVuelos[0] ?? 0;
+
+$columnasAsientos = $pdo->query("SHOW COLUMNS FROM asientos_avion")->fetchAll(PDO::FETCH_COLUMN);
+$asientosTienenAvion = in_array('id_avion', $columnasAsientos, true);
+$idAvion = 0;
+if ($asientosTienenAvion && $idVueloReferencia > 0) {
+    $stmtAvion = $pdo->prepare("SELECT id_avion FROM vuelos WHERE id_vuelo = ? LIMIT 1");
+    $stmtAvion->execute([$idVueloReferencia]);
+    $idAvion = (int)($stmtAvion->fetchColumn() ?: 0);
+}
+
+if ($asientosTienenAvion && $idAvion > 0) {
+    $stmtAsientos = $pdo->prepare("SELECT id_asiento_avion, numero_asiento, categoria, cargo_extra FROM asientos_avion WHERE id_avion = ? ORDER BY id_asiento_avion ASC");
+    $stmtAsientos->execute([$idAvion]);
+    $asientos = $stmtAsientos->fetchAll();
+} else {
+    $asientos = $pdo->query("SELECT id_asiento_avion, numero_asiento, categoria, cargo_extra FROM asientos_avion ORDER BY id_asiento_avion ASC LIMIT 120")->fetchAll();
+}
+
+$asientosOcupados = [];
+if (!empty($idsVuelos)) {
+    $placeholders = implode(',', array_fill(0, count($idsVuelos), '?'));
+    $stmtOcupados = $pdo->prepare("SELECT DISTINCT numero_asiento FROM tickets_detalle WHERE id_vuelo IN ($placeholders) AND numero_asiento IS NOT NULL");
+    $stmtOcupados->execute($idsVuelos);
+    $asientosOcupados = array_flip($stmtOcupados->fetchAll(PDO::FETCH_COLUMN));
+}
 include_once '../../includes/header.php';
 ?>
 <form action="pasajeros.php" method="POST">
     <div class="contenedor-asientos">
         <div class="main-content">
             <div class="card">
-                <p class="eyebrow">Paso 3</p>
+                <p class="eyebrow">Paso 4</p>
                 <h2>Elegi tu asiento</h2>
                 <p class="info-pasajeros">Selecciona una ubicacion que acompañe mejor tu viaje: adelante, emergencia o estandar.</p>
                 <div class="leyenda-cabina">
@@ -32,11 +63,12 @@ include_once '../../includes/header.php';
                             <?php
                                 $cargo = (float)$as['cargo_extra'];
                                 $categoria = $cargo >= 12000 ? 'front' : ($cargo > 0 ? 'preferente' : 'estandar');
+                                $ocupado = isset($asientosOcupados[$as['numero_asiento']]);
                             ?>
-                            <label class="asiento-box asiento-disponible asiento-cat-<?=$categoria?>">
-                                <input type="radio" name="id_asiento" value="<?=$as['id_asiento_avion']?>" required style="display:none;">
+                            <label class="asiento-box <?= $ocupado ? 'asiento-ocupado' : 'asiento-disponible' ?> asiento-cat-<?=$categoria?>">
+                                <input type="radio" name="id_asiento" value="<?=$as['id_asiento_avion']?>" required style="display:none;" <?= $ocupado ? 'disabled' : '' ?>>
                                 <strong><?=$as['numero_asiento']?></strong>
-                                <span class="precio-tag">+$<?=number_format($cargo, 2)?></span>
+                                <span class="precio-tag"><?= $ocupado ? 'Ocupado' : '+$' . number_format($cargo, 2) ?></span>
                             </label>
                         <?php endforeach; ?>
                     </div>
@@ -55,8 +87,12 @@ include_once '../../includes/header.php';
 <script>
     document.querySelectorAll('.asiento-box').forEach(box => {
         box.addEventListener('click', function() {
+            if (this.classList.contains('asiento-ocupado')) return;
             document.querySelectorAll('.asiento-box').forEach(b => b.classList.remove('selected'));
             this.classList.add('selected');
+            const selected = this.querySelector('strong')?.textContent || 'seleccionado';
+            const target = document.querySelector('.sidebar-resumen .destacado');
+            if (target) target.textContent = selected;
         });
     });
 </script>

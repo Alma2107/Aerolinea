@@ -22,7 +22,7 @@ include_once '../../includes/header.php';
     <div class="contenedor-pago">
         <div class="main-content">
             <div class="card">
-                <p class="eyebrow">Paso 5</p>
+                <p class="eyebrow">Paso 6</p>
                 <h2>Método de pago</h2>
                 <div class="grupo-metodos">
                     <label class="metodo-item">

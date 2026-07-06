@@ -38,20 +38,19 @@ $pageStyles = is_array($pageStyles) ? $pageStyles : [$pageStyles];
     <nav class="nav-menu">
         <?php if(isset($_SESSION['usuario_id'])): ?>
 
-            <span class="user-welcome">
-                Hola, <?= htmlspecialchars($_SESSION['usuario_nombre']) ?>
-            </span>
-
-                <a href="/Aerolinea/consultas/login/logout.php"
-               class="btn-nav">
-               Cerrar Sesion
-            </a>
-
-                <a href="/Aerolinea/consultas/login/eliminar_cuenta.php"
-               class="btn-nav btn-danger"
-               onclick="return confirm('Â¿EstÃ¡s seguro de eliminar tu cuenta?')">
-               Eliminar Cuenta
-            </a>
+            <div class="user-menu">
+                <button class="user-menu-button" type="button" aria-haspopup="true" aria-expanded="false">
+                    <span>Hola, <?= htmlspecialchars($_SESSION['usuario_nombre']) ?></span>
+                    <span class="caret">▾</span>
+                </button>
+                <div class="user-menu-dropdown" role="menu" aria-label="Menú del usuario">
+                    <a href="/Aerolinea/consultas/reservas/mis_viajes.php" role="menuitem">Mis viajes</a>
+                    <a href="/Aerolinea/consultas/reservas/historial.php" role="menuitem">Historial</a>
+                    <a href="/Aerolinea/consultas/reservas/checkin.php" role="menuitem">Check-in</a>
+                    <a href="/Aerolinea/consultas/login/logout.php" role="menuitem">Desloguear</a>
+                    <a href="/Aerolinea/consultas/login/eliminar_cuenta.php" class="danger-link" role="menuitem" onclick="return confirm('¿Estás seguro de eliminar tu cuenta?')">Eliminar cuenta</a>
+                </div>
+            </div>
             
         <?php else: ?>
 

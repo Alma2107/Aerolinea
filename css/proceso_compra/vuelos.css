@@ -158,9 +158,10 @@
    ===================================================================== */
 .contenedor-vuelos {
     display: grid;
-    grid-template-columns: minmax(0, 2.1fr) minmax(280px, 0.9fr);
+    grid-template-columns: minmax(0, 1fr);
     gap: 22px;
-    max-width: 1240px;
+    width: min(100%, 1440px);
+    max-width: 1440px;
     margin: 24px auto;
     padding: 0 20px;
 }
@@ -178,8 +179,47 @@
 .grid-vuelos,
 .grid-planes {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 14px;
+}
+
+.multitramos-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    font-weight: 700;
+    color: #0f2c59;
+}
+
+.multitramos-toggle input {
+    width: 18px;
+    height: 18px;
+    accent-color: #0d7fd4;
+}
+
+.badge-api {
+    display: inline-flex;
+    align-self: flex-start;
+    background: #eff6ff;
+    color: #0d7fd4;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.asientos-disponibles {
+    font-size: 13px;
+    color: #4b5563;
+}
+
+.vuelo-no-disponible {
+    opacity: 0.6;
+}
+
+.vuelo-no-disponible input {
+    cursor: not-allowed;
 }
 
 .opcion-vuelo,
@@ -247,8 +287,7 @@
     border-radius: 20px;
     padding: 22px;
     height: fit-content;
-    position: sticky;
-    top: 20px;
+    position: static;
 }
 
 .sidebar-resumen h3,

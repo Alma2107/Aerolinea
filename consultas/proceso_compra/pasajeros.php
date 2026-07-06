@@ -11,7 +11,7 @@ include_once '../../includes/header.php';
     <div class="contenedor-pasajeros">
         <div class="main-content">
             <div class="card">
-                <p class="eyebrow">Paso 4</p>
+                <p class="eyebrow">Paso 5</p>
                 <h2 class="titulo-seccion">Información de los pasajeros</h2>
                 <p class="section-copy">Cada pasajero en su propia tarjeta, con los datos clave bien separados para completar más rápido.</p>
             </div>

@@ -253,6 +253,37 @@
         grid-template-columns: 1fr;
     }
 }
+
+.reporte-equipaje-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.reporte-equipaje-grid label,
+.reporte-equipaje-texto {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.reporte-equipaje-grid span,
+.reporte-equipaje-texto span {
+    font-weight: 700;
+    color: #0f2c59;
+}
+
+.reporte-equipaje-grid input,
+.reporte-equipaje-texto textarea {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.reporte-equipaje-texto {
+    margin-top: 14px;
+}
 .promo-applied-card {
     display: flex;
     gap: 14px;

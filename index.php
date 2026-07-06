@@ -1,9 +1,107 @@
 ﻿<?php
 require_once 'config/conexion.php';
-$pageStyles = ['css/reservas.css'];
-include_once 'includes/header.php';
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+function ensureComentariosTableExists(PDO $pdo): void {
+    $stmt = $pdo->query("SHOW TABLES LIKE 'comentarios'");
+    if ($stmt->rowCount() === 0) {
+        $pdo->exec("CREATE TABLE comentarios (
+            id_comentario INT(11) NOT NULL AUTO_INCREMENT,
+            id_cliente INT(11) NOT NULL,
+            comentario TEXT NOT NULL,
+            fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id_comentario),
+            KEY id_cliente (id_cliente),
+            CONSTRAINT fk_comentarios_cliente FOREIGN KEY (id_cliente) REFERENCES clientes (id_cliente) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci");
+    }
+}
+
+$comentarioError = '';
+$comentarioSuccess = '';
+$comentarioTexto = '';
+
+try {
+    ensureComentariosTableExists($pdo);
+} catch (PDOException $e) {
+    // Si no se puede crear la tabla, seguimos sin habilitar comentarios.
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['accion'] ?? '') === 'publicar_comentario') {
+    if (empty($_SESSION['usuario_id'])) {
+        $comentarioError = 'Debes estar registrado e iniciar sesión para enviar tu experiencia.';
+    } else {
+        $texto = trim($_POST['comentario'] ?? '');
+        if ($texto === '') {
+            $comentarioError = 'El comentario no puede quedar vacío.';
+        } elseif (mb_strlen($texto) > 500) {
+            $comentarioError = 'El comentario no puede exceder los 500 caracteres.';
+        } else {
+            $stmtInsert = $pdo->prepare("INSERT INTO comentarios (id_cliente, comentario, fecha_creacion) VALUES (:id_cliente, :comentario, NOW())");
+            $stmtInsert->execute([
+                'id_cliente' => $_SESSION['usuario_id'],
+                'comentario' => $texto,
+            ]);
+            header('Location: index.php?comentario_publicado=1#nosotros');
+            exit;
+        }
+        $comentarioTexto = htmlspecialchars($texto, ENT_QUOTES, 'UTF-8');
+    }
+}
+
+if (isset($_GET['comentario_publicado'])) {
+    $comentarioSuccess = 'Gracias por compartir tu experiencia, se publicó correctamente.';
+}
+
+try {
+    $stmtComentarios = $pdo->prepare("SELECT c.comentario, c.fecha_creacion, cl.nombre, cl.apellido FROM comentarios c INNER JOIN clientes cl ON cl.id_cliente = c.id_cliente WHERE cl.estado_cuenta = 1 ORDER BY c.fecha_creacion DESC LIMIT 6");
+    $stmtComentarios->execute();
+    $comentarios = $stmtComentarios->fetchAll();
+} catch (PDOException $e) {
+    $comentarios = [];
+}
 
 $aeropuertos = $pdo->query("SELECT codigo_iata, ciudad FROM aeropuertos")->fetchAll();
+$fechaRecomendada = date('Y-m-d', strtotime('+14 days'));
+
+$destinosRecomendados = $pdo->prepare("SELECT v.destino_iata, MIN(v.precio_base_vuelo) AS precio_desde, v.origen_iata, o.ciudad AS origen_ciudad, a.ciudad AS destino_ciudad, MIN(v.fecha_salida) AS proxima_salida
+    FROM vuelos v
+    INNER JOIN aeropuertos a ON a.codigo_iata = v.destino_iata
+    INNER JOIN aeropuertos o ON o.codigo_iata = v.origen_iata
+    INNER JOIN aviones av ON av.id_avion = v.id_avion
+    LEFT JOIN (
+        SELECT id_vuelo, COUNT(*) AS vendidos
+        FROM tickets_detalle
+        GROUP BY id_vuelo
+    ) t ON t.id_vuelo = v.id_vuelo
+    WHERE COALESCE(av.capacidad, 0) > COALESCE(t.vendidos, 0)
+      AND DATE(v.fecha_salida) >= CURDATE()
+      AND LOWER(v.estado_vuelo) != 'cancelado'
+      AND LOWER(av.estado) = 'activo'
+    GROUP BY v.origen_iata, v.destino_iata, o.ciudad, a.ciudad
+    ORDER BY MIN(v.fecha_salida) ASC
+    LIMIT 4");
+$destinosRecomendados->execute();
+$destinosRecomendados = $destinosRecomendados->fetchAll();
+
+$imagenesDestino = [
+    'BRC' => 'img/bariloche.jpg',
+    'COR' => 'img/car2.jpg',
+    'MIA' => 'img/sergiofly.jpg',
+    'MAD' => 'img/rdj.jpg',
+];
+
+$descripcionDestino = [
+    'BRC' => 'Montaña, lago y turismo de aventura con tarifas reales en pesos argentinos.',
+    'COR' => 'Sierras cordobesas, cultura y precios basados en vuelos reales.',
+    'MIA' => 'Playas de Miami con conexión desde Ezeiza y precios en pesos argentinos.',
+    'MAD' => 'Madrid directo desde Ezeiza para una experiencia internacional confiable.',
+];
+
+$pageStyles = ['css/reservas.css'];
+include_once 'includes/header.php';
 ?>
 
 <section class="hero-slider">
@@ -62,7 +160,7 @@ $aeropuertos = $pdo->query("SELECT codigo_iata, ciudad FROM aeropuertos")->fetch
 </section>
 
 <section class="reservation-tools unified-trips" id="reservas">
-    <div class="reservation-tool reservation-tool-status">
+    <div class="reservation-tool reservation-tool-status compact-reservation-panel">
         <p class="eyebrow">Gestionar reserva</p>
         <h2>Mis viajes</h2>
         <p>Consulta una reserva con tu codigo PNR o entra a tu panel de viajes.</p>
@@ -71,46 +169,155 @@ $aeropuertos = $pdo->query("SELECT codigo_iata, ciudad FROM aeropuertos")->fetch
             <button type="submit" class="btn-next btn-orange">Consultar PNR</button>
         </form>
     </div>
-
-    <div class="reservation-tool reservation-tool-history">
-        <p class="eyebrow">Panel del cliente</p>
-        <h2>Historial y proximos vuelos</h2>
-        <p>Revisa tus vuelos futuros, historial, check-in y tickets.</p>
-        <a href="consultas/reservas/mis_viajes.php" class="btn-next">Entrar a Mis viajes</a>
-    </div>
 </section>
 
-<div class="booking-layout" id="buscador">
-    <div class="main-content">
-        <div class="card">
+<div class="booking-layout full-width-search" id="buscador">
+    <div class="main-content full-width-main-content">
+        <div class="card search-card-full">
             <p class="eyebrow">Buscador principal</p>
             <h2>A donde queres viajar</h2>
             <p class="section-copy">Busca vuelos, compara horarios y elegi la tarifa que mas te convenga.</p>
             <form action="consultas/proceso_compra/vuelos.php" method="GET" id="flight-search-form">
                 <input type="hidden" name="codigo_promo" id="codigo_promo" value="">
                 <div class="trip-type-selector">
-                    <label><input type="radio" name="tipo_viaje" value="ida_vuelta" checked> Ida y Vuelta</label>
-                    <label><input type="radio" name="tipo_viaje" value="solo_ida"> Solo Ida</label>
+                    <label class="trip-type-option"><input type="radio" name="tipo_viaje" value="ida_vuelta" checked> <span>Ida y vuelta</span></label>
+                    <label class="trip-type-option"><input type="radio" name="tipo_viaje" value="solo_ida"> <span>Ida</span></label>
+                    <label class="trip-type-option"><input type="radio" name="tipo_viaje" value="multitramos"> <span>Multitramos</span></label>
                 </div>
-                <div class="search-grid">
-                    <select name="origen" required>
-                        <option value="">Origen</option>
-                        <?php foreach($aeropuertos as $ap): ?>
-                            <option value="<?=$ap['codigo_iata']?>"><?=$ap['ciudad']?> (<?=$ap['codigo_iata']?>)</option>
-                        <?php endforeach; ?>
-                    </select>
-                    <select name="destino" required>
-                        <option value="">Destino</option>
-                        <?php foreach($aeropuertos as $ap): ?>
-                            <option value="<?=$ap['codigo_iata']?>"><?=$ap['ciudad']?> (<?=$ap['codigo_iata']?>)</option>
-                        <?php endforeach; ?>
-                    </select>
-                    <input type="date" name="fecha_ida" required>
-                    <input type="date" name="fecha_vuelta">
-                    <input type="number" name="pasajeros" min="1" max="5" value="1">
+
+                <div class="travel-mode-panels">
+                    <div class="travel-mode-panel active" data-panel="ida_vuelta">
+                        <div class="search-grid">
+                            <select name="origen" required>
+                                <option value="">Origen</option>
+                                <?php foreach($aeropuertos as $ap): ?>
+                                    <option value="<?=$ap['codigo_iata']?>"><?=$ap['ciudad']?> (<?=$ap['codigo_iata']?>)</option>
+                                <?php endforeach; ?>
+                            </select>
+                            <select name="destino" required>
+                                <option value="">Destino</option>
+                                <?php foreach($aeropuertos as $ap): ?>
+                                    <option value="<?=$ap['codigo_iata']?>"><?=$ap['ciudad']?> (<?=$ap['codigo_iata']?>)</option>
+                                <?php endforeach; ?>
+                            </select>
+                            <input type="date" name="fecha_ida" required>
+                            <input type="date" name="fecha_vuelta" required>
+                            <input type="number" name="pasajeros" min="1" max="5" value="1">
+                        </div>
+                    </div>
+
+                    <div class="travel-mode-panel" data-panel="solo_ida">
+                        <div class="search-grid">
+                            <select name="origen_solo" required>
+                                <option value="">Origen</option>
+                                <?php foreach($aeropuertos as $ap): ?>
+                                    <option value="<?=$ap['codigo_iata']?>"><?=$ap['ciudad']?> (<?=$ap['codigo_iata']?>)</option>
+                                <?php endforeach; ?>
+                            </select>
+                            <select name="destino_solo" required>
+                                <option value="">Destino</option>
+                                <?php foreach($aeropuertos as $ap): ?>
+                                    <option value="<?=$ap['codigo_iata']?>"><?=$ap['ciudad']?> (<?=$ap['codigo_iata']?>)</option>
+                                <?php endforeach; ?>
+                            </select>
+                            <input type="date" name="fecha_ida_solo" required>
+                            <input type="number" name="pasajeros_solo" min="1" max="5" value="1">
+                        </div>
+                    </div>
+
+                    <div class="travel-mode-panel" data-panel="multitramos">
+                        <div class="search-grid multi-segment-grid">
+                            <select name="origen_multi_1" required>
+                                <option value="">Tramo 1 • Origen</option>
+                                <?php foreach($aeropuertos as $ap): ?>
+                                    <option value="<?=$ap['codigo_iata']?>"><?=$ap['ciudad']?> (<?=$ap['codigo_iata']?>)</option>
+                                <?php endforeach; ?>
+                            </select>
+                            <select name="destino_multi_1" required>
+                                <option value="">Tramo 1 • Destino</option>
+                                <?php foreach($aeropuertos as $ap): ?>
+                                    <option value="<?=$ap['codigo_iata']?>"><?=$ap['ciudad']?> (<?=$ap['codigo_iata']?>)</option>
+                                <?php endforeach; ?>
+                            </select>
+                            <input type="date" name="fecha_multi_1" required>
+                            <select name="origen_multi_2" required>
+                                <option value="">Tramo 2 • Origen</option>
+                                <?php foreach($aeropuertos as $ap): ?>
+                                    <option value="<?=$ap['codigo_iata']?>"><?=$ap['ciudad']?> (<?=$ap['codigo_iata']?>)</option>
+                                <?php endforeach; ?>
+                            </select>
+                            <select name="destino_multi_2" required>
+                                <option value="">Tramo 2 • Destino</option>
+                                <?php foreach($aeropuertos as $ap): ?>
+                                    <option value="<?=$ap['codigo_iata']?>"><?=$ap['ciudad']?> (<?=$ap['codigo_iata']?>)</option>
+                                <?php endforeach; ?>
+                            </select>
+                            <input type="date" name="fecha_multi_2" required>
+                            <input type="number" name="pasajeros_multi" min="1" max="5" value="1">
+                        </div>
+                        <p class="helper-text">Combina varios trayectos en una sola reserva para visitar más de una ciudad sin volver al punto de inicio.</p>
+                    </div>
                 </div>
+
                 <button type="submit" class="btn-next">Buscar vuelos</button>
             </form>
+
+            <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const form = document.getElementById('flight-search-form');
+                if (!form) return;
+                const radios = document.querySelectorAll('input[name="tipo_viaje"]');
+                const panels = document.querySelectorAll('.travel-mode-panel');
+                const today = new Date().toISOString().split('T')[0];
+                const dateFields = form.querySelectorAll('input[type="date"]');
+                const ida = form.elements['fecha_ida'];
+                const vuelta = form.elements['fecha_vuelta'];
+                const soloIda = form.elements['fecha_ida_solo'];
+                const multi1 = form.elements['fecha_multi_1'];
+                const multi2 = form.elements['fecha_multi_2'];
+
+                dateFields.forEach(field => {
+                    field.min = today;
+                });
+
+                function sincronizarFechas() {
+                    if (ida && vuelta) {
+                        vuelta.min = ida.value || today;
+                        if (ida.value && vuelta.value && vuelta.value < ida.value) {
+                            vuelta.value = ida.value;
+                        }
+                    }
+
+                    if (soloIda) {
+                        soloIda.min = today;
+                    }
+
+                    if (multi1 && multi2) {
+                        multi2.min = multi1.value || today;
+                        if (multi1.value && multi2.value && multi2.value < multi1.value) {
+                            multi2.value = multi1.value;
+                        }
+                    }
+                }
+
+                function actualizarPanel() {
+                    const selected = document.querySelector('input[name="tipo_viaje"]:checked')?.value || 'ida_vuelta';
+                    panels.forEach(panel => {
+                        const active = panel.dataset.panel === selected;
+                        panel.classList.toggle('active', active);
+                        panel.querySelectorAll('input, select').forEach(field => {
+                            field.disabled = !active;
+                        });
+                    });
+                    sincronizarFechas();
+                }
+
+                radios.forEach(radio => radio.addEventListener('change', actualizarPanel));
+                dateFields.forEach(field => field.addEventListener('change', sincronizarFechas));
+                actualizarPanel();
+            });
+            </script>
+
         </div>
     </div>
 </div>
@@ -159,89 +366,48 @@ $aeropuertos = $pdo->query("SELECT codigo_iata, ciudad FROM aeropuertos")->fetch
 <section class="recommended-trips" id="recomendados">
     <div class="section-heading">
         <p class="eyebrow">Recomendados</p>
-        <h2>Elegi tu proximo destino</h2>
+        <h2>Destinos con vuelos disponibles</h2>
     </div>
 
     <div class="trip-grid">
-        <article class="trip-card trip-card-brasil">
-            <span class="trip-tag">Brasil</span>
-            <div class="offer-card">
-            <span>Desde</span>
-            <h3>$89.999</h3>
-            <p>Buenos Aires - Rio de Janeiro</p>
-        </div>
-
-            <img src="img/rdj.jpg" alt="Rio de Janeiro">
-            <h3>Rio de Janeiro</h3>
-            <p>Playas, ciudad y vuelos directos para una escapada completa.</p>
-            <ul>
-                <li>Playas urbanas</li>
-                <li>Vuelos directos</li>
-                <li>Ideal para escapadas largas</li>
-            </ul>
-            
-        </article>
-
-        <article class="trip-card trip-card-argentina">
-            <span class="trip-tag">Argentina</span>
-        <div class="offer-card">
-            <span>Desde</span>
-            <h3>$69.999</h3>
-            <p>Buenos Aires - Bariloche</p>
-        </div>
-
-            <img src="img/bariloche.jpg" alt="Bariloche">
-            <h3>Bariloche</h3>
-            <p>Montana, lago y salidas para viajar en pareja o en familia.</p>
-            <ul>
-                <li>Paquetes de invierno</li>
-                <li>Salida flexible</li>
-                <li>Experiencia premium</li>
-            </ul>
-        </article>
-
-        <article class="trip-card trip-card-uruguay">
-            <span class="trip-tag">Uruguay</span>
-        <div class="offer-card">
-            <span>Desde</span>
-            <h3>$39.999</h3>
-            <p>Buenos Aires - Uruguay</p>
-        </div>
-            <img src="img/pde.jpg" alt="Punta del Este">
-            <h3>Punta del Este</h3>
-            <p>Playa y descanso para una escapada corta.</p>
-            <ul>
-                <li>Escapadas cortas</li>
-                <li>Buena conexion regional</li>
-                <li>Temporada alta y baja</li>
-            </ul>
-        </article>
-
-        <article class="trip-card trip-card-chile">
-            <span class="trip-tag">Chile</span>
-         <div class="offer-card">
-            <span>Desde</span>
-            <h3>$59.999</h3>
-            <p>Buenos Aires - Santiago</p>
-        </div>
-            <img src="img/sdc.jpg" alt="Santiago">
-            <h3>Santiago</h3>
-            <p>Una ruta practica para conexiones, trabajo o turismo urbano.</p>
-            <ul>
-                <li>Conexiones rapidas</li>
-                <li>Turismo urbano</li>
-                <li>Plan flexible</li>
-            </ul>
-        </article>
+        <?php if (!empty($destinosRecomendados)): ?>
+            <?php foreach ($destinosRecomendados as $dest): ?>
+                <?php
+                    $imagen = $imagenesDestino[$dest['destino_iata']] ?? 'img/car1.jpg';
+                    $descripcion = $descripcionDestino[$dest['destino_iata']] ?? 'Tarifa base en pesos argentinos para este destino.';
+                    $rutaTexto = htmlspecialchars($dest['origen_ciudad'] . ' - ' . $dest['destino_ciudad'], ENT_QUOTES, 'UTF-8');
+                    $fechaVuelo = isset($dest['proxima_salida']) ? date('Y-m-d', strtotime($dest['proxima_salida'])) : $fechaRecomendada;
+                    $urlDestino = 'consultas/proceso_compra/vuelos.php?tipo_viaje=solo_ida&origen_solo=' . urlencode($dest['origen_iata']) . '&destino_solo=' . urlencode($dest['destino_iata']) . '&fecha_ida_solo=' . urlencode($fechaVuelo) . '&pasajeros_solo=1#vuelos-disponibles';
+                ?>
+                <a class="trip-card" href="<?= htmlspecialchars($urlDestino, ENT_QUOTES, 'UTF-8') ?>">
+                    <span class="trip-tag"><?= htmlspecialchars($dest['destino_ciudad'], ENT_QUOTES, 'UTF-8') ?></span>
+                    <div class="offer-card">
+                        <span>Desde</span>
+                        <h3>$<?= number_format((float)$dest['precio_desde'], 0, ',', '.') ?></h3>
+                        <p><?= $rutaTexto ?></p>
+                    </div>
+                    <img src="<?= htmlspecialchars($imagen, ENT_QUOTES, 'UTF-8') ?>" alt="<?= $rutaTexto ?>">
+                    <h3><?= htmlspecialchars($dest['destino_ciudad'], ENT_QUOTES, 'UTF-8') ?></h3>
+                    <p><?= htmlspecialchars($descripcion, ENT_QUOTES, 'UTF-8') ?></p>
+                    <ul>
+                        <li>Precio en pesos argentinos</li>
+                        <li>Vuelos con disponibilidad real</li>
+                        <li>Reserva directa desde el buscador</li>
+                    </ul>
+                </a>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <p>No hay recomendaciones cargadas en este momento. Vuelve a consultar más tarde.</p>
+        <?php endif; ?>
     </div>
-</section>
+</section> 
 
 
 <br>
 <br>
 <br>
 
-<section class="recommended-trips" id="Mas Informacion">
+<section class="recommended-trips" id="nosotros">
     <p class="eyebrow">Mas Informacion</p>
 <br>
 
@@ -280,21 +446,46 @@ $aeropuertos = $pdo->query("SELECT codigo_iata, ciudad FROM aeropuertos")->fetch
         <h2>Lo que dicen nuestros pasajeros</h2>
     </div>
 
+    <?php if ($comentarioSuccess): ?>
+        <div class="comment-message success"><?= htmlspecialchars($comentarioSuccess, ENT_QUOTES, 'UTF-8') ?></div>
+    <?php endif; ?>
+    <?php if ($comentarioError): ?>
+        <div class="comment-message error"><?= htmlspecialchars($comentarioError, ENT_QUOTES, 'UTF-8') ?></div>
+    <?php endif; ?>
+
     <div class="testimonial-grid">
-        <div class="testimonial">
-            <p>"La compra fue rapida y clara."</p>
-            <strong>Maria G.</strong>
-        </div>
-<br>
-        <div class="testimonial">
-            <p>"Buena atencion y precios claros."</p>
-            <strong>Carlos R.</strong>
-        </div>
-<br>
-        <div class="testimonial">
-            <p>"Pude reservar sin complicaciones."</p>
-            <strong>Sofia M.</strong>
-        </div>
+        <?php if (!empty($comentarios)): ?>
+            <?php foreach ($comentarios as $comentario): ?>
+                <div class="testimonial">
+                    <p>"<?= nl2br(htmlspecialchars($comentario['comentario'], ENT_QUOTES, 'UTF-8')) ?>"</p>
+                    <strong><?= htmlspecialchars($comentario['nombre'] . ' ' . $comentario['apellido'], ENT_QUOTES, 'UTF-8') ?></strong>
+                </div>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <div class="testimonial">
+                <p>Aun no hay opiniones publicadas. Sé el primero en compartir tu experiencia.</p>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <div class="comment-panel">
+        <?php if (isset($_SESSION['usuario_id'])): ?>
+            <form class="comment-form" action="index.php#nosotros" method="POST">
+                <input type="hidden" name="accion" value="publicar_comentario">
+                <label for="comentario">Deja tu experiencia</label>
+                <textarea id="comentario" name="comentario" rows="5" maxlength="500" placeholder="Contanos cómo fue tu viaje"><?= $comentarioTexto ?></textarea>
+                <button type="submit" class="btn-next btn-comment-submit">Publicar comentario</button>
+                <p class="comment-help">Solo los usuarios registrados pueden publicar opiniones. Tu nombre aparecerá junto al comentario.</p>
+            </form>
+        <?php else: ?>
+            <div class="auth-prompt">
+                <p>Debes iniciar sesión para dejar un comentario. El espacio está siempre visible para que leas experiencias reales.</p>
+                <div class="auth-buttons">
+                    <a href="consultas/login/login.php" class="btn-next btn-orange">Iniciar Sesión</a>
+                    <a href="consultas/login/registro.php" class="btn-next">Registrarse</a>
+                </div>
+            </div>
+        <?php endif; ?>
     </div>
 </section>
     </div>
