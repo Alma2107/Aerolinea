@@ -1,4 +1,4 @@
-/* css/estilos.css */
+﻿/* css/estilos.css */
 :root {
     --primary-color: #0f2c59;
     --secondary-color: #00a896;
@@ -21,7 +21,8 @@ body {
     overflow-x: hidden;
     background-color: var(--light-bg);
     color: var(--dark-text);
-    padding-bottom: 0;
+    padding: 0;
+    margin: 0;
 }
 
 /* Header */
@@ -57,16 +58,19 @@ body {
    HEADER MEJORADO
 =========================== */
 
-.main-header{
-    background-color: var(--primary-color);
-    color:white;
-    padding:15px 30px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    position:sticky;
-    top:0;
-    z-index:1000;
+.main-header {
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    width: 100%;
+    background: linear-gradient(90deg, #0b2348 0%, #143b6f 50%, #0f2c59 100%);
+    color: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 6px 20px rgba(7, 22, 45, 0.18);
 }
 
 .logo{
@@ -423,7 +427,7 @@ body {
     max-width: none;
     background: linear-gradient(90deg, #0b2348 0%, #143b6f 50%, #0f2c59 100%);
     box-shadow: 0 10px 30px rgba(7, 22, 45, 0.18);
-    position: sticky;
+    position: absolute;
     top: 0;
     z-index: 1000;
 }

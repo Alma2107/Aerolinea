@@ -1,18 +1,17 @@
 <?php
 require_once '../../config/conexion.php';
+require_once 'flujo_helpers.php';
 session_start();
 
 $pageStyles = ['../../css/proceso_compra/pago.css', '../../css/reservas.css'];
 require_once '../../includes/header.php';
 
 $datosPasajeros = $_SESSION['datos_pasajeros'] ?? [];
-$idsVuelos = $_SESSION['id_vuelo'] ?? [];
-$idsVuelos = is_array($idsVuelos) ? array_map('intval', $idsVuelos) : [(int)$idsVuelos];
-$idsVuelos = array_values(array_filter($idsVuelos));
+$idsVuelos = normalizarIdsVuelos($_SESSION['id_vuelo'] ?? []);
 $idPlan = (int)($_SESSION['id_plan'] ?? 0);
 $idAsiento = (int)($_SESSION['id_asiento'] ?? 0);
 $serviciosElegidos = $_SESSION['servicios_elegidos'] ?? [];
-$equipajesElegidos = array_map('intval', $_SESSION['equipajes_elegidos'] ?? []);
+$equipajesElegidos = $_SESSION['equipajes_elegidos'] ?? [];
 $codigoPromo = strtoupper(trim($_SESSION['codigo_promo'] ?? ''));
 
 function mostrarErrorConfirmacion(string $titulo, string $mensaje): void {
@@ -34,14 +33,6 @@ function generarPnr(PDO $pdo): string {
     return $pnr;
 }
 
-function descuentoPromo(string $codigoPromo): float {
-    return match ($codigoPromo) {
-        'BARILO20' => 0.20,
-        'CORDOBA2X1' => 0.50,
-        default => 0.00,
-    };
-}
-
 if (empty($idsVuelos) || $idPlan <= 0 || $idAsiento <= 0 || empty($datosPasajeros)) {
     mostrarErrorConfirmacion('Faltan datos para confirmar la reserva', 'Completa vuelo, equipaje, servicios, asiento y pasajeros antes de finalizar el pago.');
     include_once '../../includes/footer.php';
@@ -53,7 +44,7 @@ try {
     $pdo->beginTransaction();
 
     $placeholders = implode(',', array_fill(0, count($idsVuelos), '?'));
-    $stmtVuelos = $pdo->prepare("SELECT id_vuelo, precio_base_vuelo FROM vuelos WHERE id_vuelo IN ($placeholders)");
+    $stmtVuelos = $pdo->prepare("SELECT id_vuelo, precio_base_vuelo, destino_iata FROM vuelos WHERE id_vuelo IN ($placeholders)");
     $stmtVuelos->execute($idsVuelos);
     $vuelos = $stmtVuelos->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
 
@@ -72,10 +63,20 @@ try {
     $cargoAsiento = (float)($asientoData['cargo_extra'] ?? 0);
 
     $preciosEquipaje = [];
-    if (!empty($equipajesElegidos)) {
-        $eqPlaceholders = implode(',', array_fill(0, count($equipajesElegidos), '?'));
+    $idsEquipajes = [];
+    foreach ($equipajesElegidos as $pasajeroEquipajes) {
+        foreach ((array)$pasajeroEquipajes as $idEquipaje) {
+            $idEquipaje = (int)$idEquipaje;
+            if ($idEquipaje > 0) {
+                $idsEquipajes[] = $idEquipaje;
+            }
+        }
+    }
+    $idsEquipajes = array_values(array_unique($idsEquipajes));
+    if (!empty($idsEquipajes)) {
+        $eqPlaceholders = implode(',', array_fill(0, count($idsEquipajes), '?'));
         $stmtEquipajes = $pdo->prepare("SELECT id_tipo_equipaje, precio_unitario FROM tipos_equipaje WHERE id_tipo_equipaje IN ($eqPlaceholders)");
-        $stmtEquipajes->execute($equipajesElegidos);
+        $stmtEquipajes->execute($idsEquipajes);
         $preciosEquipaje = $stmtEquipajes->fetchAll(PDO::FETCH_KEY_PAIR);
     }
 
@@ -94,14 +95,15 @@ try {
         $preciosServicios = $stmtServicios->fetchAll(PDO::FETCH_KEY_PAIR);
     }
 
-    $descuento = descuentoPromo($codigoPromo);
     $montoTotal = 0.00;
     foreach ($datosPasajeros as $indicePasajero => $_pasajero) {
         foreach ($idsVuelos as $idVuelo) {
-            $montoTotal += ((float)$vuelos[$idVuelo]['precio_base_vuelo'] * (1 - $descuento)) + $cargoPlan + $cargoAsiento;
+            $precioBase = (float)$vuelos[$idVuelo]['precio_base_vuelo'];
+            $precioVuelo = precioTramoPorPasajero($precioBase, $indicePasajero, count($datosPasajeros), $codigoPromo, (string)$vuelos[$idVuelo]['destino_iata']);
+            $montoTotal += $precioVuelo + ($precioVuelo > 0 ? $cargoPlan + $cargoAsiento : 0.0);
         }
-        foreach ($equipajesElegidos as $idEquipaje) {
-            $montoTotal += $codigoPromo === 'EQUIPAJEGRATIS' ? 0 : (float)($preciosEquipaje[$idEquipaje] ?? 0);
+        foreach ((array)($equipajesElegidos[$indicePasajero] ?? []) as $idEquipaje) {
+            $montoTotal += $codigoPromo === 'EQUIPAJEGRATIS' ? 0 : (float)($preciosEquipaje[(int)$idEquipaje] ?? 0);
         }
         foreach (($serviciosElegidos[$indicePasajero] ?? []) as $idServicio) {
             $montoTotal += (float)($preciosServicios[$idServicio] ?? 0);
@@ -139,7 +141,11 @@ try {
 
         foreach ($idsVuelos as $idVuelo) {
             $pnr = generarPnr($pdo);
-            $precioTramo = ((float)$vuelos[$idVuelo]['precio_base_vuelo'] * (1 - $descuento)) + $cargoPlan + $cargoAsiento;
+            $precioBase = (float)$vuelos[$idVuelo]['precio_base_vuelo'];
+            $precioTramo = precioTramoPorPasajero($precioBase, $indicePasajero, count($datosPasajeros), $codigoPromo, (string)$vuelos[$idVuelo]['destino_iata']);
+            if ($precioTramo > 0) {
+                $precioTramo += $cargoPlan + $cargoAsiento;
+            }
 
             $stmtTicket = $pdo->prepare("
                 INSERT INTO tickets_detalle (id_orden, id_vuelo, id_pasajero, numero_asiento, id_plan, codigo_reserva_pnr, precio_tramo_pagado)
@@ -157,12 +163,12 @@ try {
             $idTicket = (int)$pdo->lastInsertId();
             $pnrsGenerados[] = $pnr;
 
-            foreach ($equipajesElegidos as $idEquipaje) {
-                $precioEquipaje = $codigoPromo === 'EQUIPAJEGRATIS' ? 0 : (float)($preciosEquipaje[$idEquipaje] ?? 0);
+            foreach ((array)($equipajesElegidos[$indicePasajero] ?? []) as $idEquipaje) {
+                $precioEquipaje = $codigoPromo === 'EQUIPAJEGRATIS' ? 0 : (float)($preciosEquipaje[(int)$idEquipaje] ?? 0);
                 $stmtEquipaje = $pdo->prepare("INSERT INTO ticket_equipajes (id_ticket, id_tipo_equipaje, cantidad, precio_pagado) VALUES (:ticket, :equipaje, 1, :precio)");
                 $stmtEquipaje->execute([
                     'ticket' => $idTicket,
-                    'equipaje' => $idEquipaje,
+                    'equipaje' => (int)$idEquipaje,
                     'precio' => $precioEquipaje,
                 ]);
             }

@@ -1,5 +1,6 @@
 ﻿<?php
 require_once '../../config/conexion.php';
+require_once 'flujo_helpers.php';
 session_start();
 
 $pageStyles = ['../../css/proceso_compra/vuelos.css'];
@@ -73,28 +74,8 @@ if ($multitramos && !empty($segmentosBusqueda)) {
     }
 }
 
-$promos = [
-    'BARILO20' => [
-        'titulo' => '20% OFF en Bariloche',
-        'descripcion' => 'Descuento aplicado a vuelos con destino Bariloche.',
-        'destino' => 'BRC',
-        'descuento' => 0.20,
-    ],
-    'EQUIPAJEGRATIS' => [
-        'titulo' => 'Equipaje gratis',
-        'descripcion' => 'El beneficio se aplicara en el paso de equipaje.',
-        'destino' => '',
-        'descuento' => 0,
-    ],
-    'CORDOBA2X1' => [
-        'titulo' => '2x1 a Cordoba',
-        'descripcion' => 'Promocion preparada para dos pasajeros hacia Cordoba.',
-        'destino' => 'COR',
-        'descuento' => 0.50,
-    ],
-];
-
-$promoActiva = $promos[$codigoPromo] ?? null;
+$promos = obtenerPromos();
+$promoActiva = $promos[strtoupper(trim($codigoPromo))] ?? null;
 if ($promoActiva) {
     $_SESSION['promo_activa'] = $codigoPromo;
     $_SESSION['promo_equipaje_gratis'] = $codigoPromo === 'EQUIPAJEGRATIS';
@@ -109,6 +90,7 @@ if ($promoActiva) {
 $_SESSION['tipo_viaje'] = $tipoViaje;
 $_SESSION['pasajeros'] = $pasajeros;
 $_SESSION['codigo_promo'] = $codigoPromo;
+$_SESSION['segmentos_busqueda'] = $segmentosBusqueda;
 
 function buscarVuelos(PDO $pdo, string $origen, string $destino, string $fechaIda): array {
     $sql = "
@@ -226,7 +208,7 @@ include_once '../../includes/header.php';
                         <?php foreach($vuelos as $v): ?>
                             <?php
                                 $precioBase = (float)$v['precio_base_vuelo'];
-                                $precioFinal = $promoActiva ? $precioBase * (1 - (float)$promoActiva['descuento']) : $precioBase;
+                                $precioFinal = $promoActiva ? calcularPrecioTotalVuelo($precioBase, $pasajeros, $codigoPromo, (string)$v['destino_iata']) : $precioBase;
                                 $asientosDisponibles = (int)($v['asientos_disponibles'] ?? 18);
                                 $disponible = $asientosDisponibles > 0;
                                 $selectorName = $multitramos ? 'id_vuelo[]' : 'id_vuelo';
@@ -244,7 +226,7 @@ include_once '../../includes/header.php';
                                 <?php if ($promoActiva && $promoActiva['descuento'] > 0): ?>
                                     <span class="precio-vuelo precio-anterior">Antes $<?= number_format($precioBase, 2, ',', '.') ?></span>
                                 <?php endif; ?>
-                                <span class="precio-vuelo">Final: $<?= number_format($precioFinal, 2, ',', '.') ?></span>
+                                <span class="precio-vuelo">Total estimado para el grupo: $<?= number_format($precioFinal, 2, ',', '.') ?></span>
                             </label>
                         <?php endforeach; ?>
                     </div>

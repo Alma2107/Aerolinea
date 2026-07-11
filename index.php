@@ -494,66 +494,55 @@ include_once 'includes/header.php';
 </section>
 
 <script>
+document.addEventListener('DOMContentLoaded', function () {
+    const slides = document.querySelectorAll('.slide');
+    const nextBtn = document.querySelector('.next');
+    const prevBtn = document.querySelector('.prev');
+    const searchForm = document.getElementById('flight-search-form');
 
-const slides = document.querySelectorAll('.slide');
-const nextBtn = document.querySelector('.next');
-const prevBtn = document.querySelector('.prev');
+    if (slides.length) {
+        let current = 0;
 
-let current = 0;
+        function showSlide(index) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            slides[index].classList.add('active');
+        }
 
-function showSlide(index){
+        function nextSlide() {
+            current = (current + 1) % slides.length;
+            showSlide(current);
+        }
 
-    slides.forEach(slide => {
-        slide.classList.remove('active');
-    });
+        function prevSlide() {
+            current = (current - 1 + slides.length) % slides.length;
+            showSlide(current);
+        }
 
-    slides[index].classList.add('active');
-}
-
-function nextSlide(){
-    current++;
-
-    if(current >= slides.length){
-        current = 0;
+        if (nextBtn) nextBtn.addEventListener('click', nextSlide);
+        if (prevBtn) prevBtn.addEventListener('click', prevSlide);
+        setInterval(nextSlide, 5000);
     }
 
-    showSlide(current);
-}
-
-function prevSlide(){
-    current--;
-
-    if(current < 0){
-        current = slides.length - 1;
-    }
-
-    showSlide(current);
-}
-
-nextBtn.addEventListener('click', nextSlide);
-prevBtn.addEventListener('click', prevSlide);
-
-/* automatico cada 5 segundos */
-
-setInterval(nextSlide, 5000);
-
-</script>
-<script>
-const searchForm = document.getElementById('flight-search-form');
-if (searchForm) {
-    const fields = ['origen', 'destino', 'fecha_ida', 'fecha_vuelta', 'pasajeros'];
-    fields.forEach(name => {
-        const field = searchForm.elements[name];
-        const saved = localStorage.getItem('flysmart_' + name);
-        if (field && saved && !field.value) field.value = saved;
-    });
-    searchForm.addEventListener('submit', () => {
+    if (searchForm) {
+        const fields = ['origen', 'destino', 'fecha_ida', 'fecha_vuelta', 'pasajeros'];
         fields.forEach(name => {
             const field = searchForm.elements[name];
-            if (field) localStorage.setItem('flysmart_' + name, field.value);
+            const saved = localStorage.getItem('flysmart_' + name);
+            if (field && saved && !field.value) {
+                field.value = saved;
+            }
         });
-    });
-}
+
+        searchForm.addEventListener('submit', () => {
+            fields.forEach(name => {
+                const field = searchForm.elements[name];
+                if (field) {
+                    localStorage.setItem('flysmart_' + name, field.value);
+                }
+            });
+        });
+    }
+});
 </script>
 <?php
 

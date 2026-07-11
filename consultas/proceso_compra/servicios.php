@@ -1,30 +1,33 @@
 <?php
 require_once '../../config/conexion.php';
+require_once 'flujo_helpers.php';
 session_start();
 
 $pageStyles = ['../../css/proceso_compra/servicios.css'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $_SESSION['equipajes_elegidos'] = array_map('intval', $_POST['equipajes'] ?? []);
+    $_SESSION['servicios_elegidos'] = [];
+    foreach ($_POST['servicios_elegidos'] ?? [] as $pasajero => $serviciosPasajero) {
+        $_SESSION['servicios_elegidos'][(int)$pasajero] = array_map('intval', (array)$serviciosPasajero);
+    }
 }
 
 $cantidadPasajeros = max(1, (int)($_SESSION['pasajeros'] ?? 1));
-$idsVuelos = $_SESSION['id_vuelo'] ?? [];
-$idsVuelos = is_array($idsVuelos) ? array_map('intval', $idsVuelos) : [(int)$idsVuelos];
-$idsVuelos = array_values(array_filter($idsVuelos));
+$idsVuelos = normalizarIdsVuelos($_SESSION['id_vuelo'] ?? []);
 $idPlan = (int)($_SESSION['id_plan'] ?? 0);
+$codigoPromo = strtoupper(trim($_SESSION['codigo_promo'] ?? ''));
 
 $vuelosResumen = [];
 $totalBase = 0.00;
 
 if (!empty($idsVuelos)) {
     $placeholders = implode(',', array_fill(0, count($idsVuelos), '?'));
-    $stmtVuelos = $pdo->prepare("SELECT id_vuelo, numero_vuelo, precio_base_vuelo FROM vuelos WHERE id_vuelo IN ($placeholders)");
+    $stmtVuelos = $pdo->prepare("SELECT id_vuelo, numero_vuelo, precio_base_vuelo, destino_iata FROM vuelos WHERE id_vuelo IN ($placeholders)");
     $stmtVuelos->execute($idsVuelos);
     $vuelosResumen = $stmtVuelos->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($vuelosResumen as $vueloResumen) {
-        $totalBase += (float)$vueloResumen['precio_base_vuelo'] * $cantidadPasajeros;
+        $totalBase += calcularPrecioTotalVuelo((float)$vueloResumen['precio_base_vuelo'], $cantidadPasajeros, $codigoPromo, (string)$vueloResumen['destino_iata']);
     }
 }
 
@@ -38,15 +41,23 @@ $equipajes = $pdo->query("SELECT id_tipo_equipaje, nombre_tipo, precio_unitario 
 $servicios = $pdo->query("SELECT id_servicio, nombre_servicio, descripcion, precio_servicio FROM servicios_adicionales")->fetchAll(PDO::FETCH_ASSOC);
 
 $subtotalEquipajes = 0.00;
-foreach ($_SESSION['equipajes_elegidos'] ?? [] as $idEquipaje) {
-    $precio = (float)($equipajes[$idEquipaje]['precio_unitario'] ?? 0);
-    if (!empty($_SESSION['codigo_promo']) && $_SESSION['codigo_promo'] === 'EQUIPAJEGRATIS') {
-        $precio = 0;
+$equipajesElegidos = $_SESSION['equipajes_elegidos'] ?? [];
+if (!is_array($equipajesElegidos)) {
+    $equipajesElegidos = [];
+}
+foreach ($equipajesElegidos as $pasajeroEquipajes) {
+    foreach ((array)$pasajeroEquipajes as $idEquipaje) {
+        $idEquipaje = (int)$idEquipaje;
+        $precio = (float)($equipajes[$idEquipaje]['precio_unitario'] ?? 0);
+        if ($codigoPromo === 'EQUIPAJEGRATIS') {
+            $precio = 0;
+        }
+        $subtotalEquipajes += $precio;
     }
-    $subtotalEquipajes += $precio;
 }
 
 $totalConEquipaje = $totalBase + $subtotalEquipajes;
+$serviciosElegidos = $_SESSION['servicios_elegidos'] ?? [];
 
 include_once '../../includes/header.php';
 ?>
@@ -66,6 +77,7 @@ include_once '../../includes/header.php';
 
                 <div class="grid-servicios">
                     <?php foreach ($servicios as $servicio): ?>
+                        <?php $serviciosPasajero = $serviciosElegidos[$i] ?? []; ?>
                         <div class="item-servicio">
                             <label class="label-servicio">
                                 <input
@@ -75,6 +87,7 @@ include_once '../../includes/header.php';
                                     data-precio="<?= (float)$servicio['precio_servicio'] ?>"
                                     data-nombre="P#<?= $i ?> - <?= htmlspecialchars($servicio['nombre_servicio'], ENT_QUOTES, 'UTF-8') ?>"
                                     class="check-servicio"
+                                    <?= in_array((int)$servicio['id_servicio'], $serviciosPasajero, true) ? 'checked' : '' ?>
                                 >
                                 <div>
                                     <strong><?= htmlspecialchars($servicio['nombre_servicio'], ENT_QUOTES, 'UTF-8') ?></strong>
@@ -96,14 +109,14 @@ include_once '../../includes/header.php';
         <p><strong>Vuelos:</strong> <?= htmlspecialchars(implode(', ', array_column($vuelosResumen, 'numero_vuelo')) ?: 'No asignado', ENT_QUOTES, 'UTF-8') ?></p>
         <p><strong>Pasajeros:</strong> x<?= $cantidadPasajeros ?></p>
 
-        <?php if (!empty($_SESSION['equipajes_elegidos'])): ?>
+        <?php if (!empty($equipajesElegidos)): ?>
             <p class="titulo-seccion-resumen">Equipaje seleccionado:</p>
             <ul class="lista-resumen lista-equipaje-resumen">
-                <?php foreach ($_SESSION['equipajes_elegidos'] as $idEquipaje): ?>
-                    <?php if (!isset($equipajes[$idEquipaje])) continue; ?>
+                <?php foreach ($equipajesElegidos as $pasajero => $idsEquipaje): ?>
+                    <?php $nombres = []; foreach ((array)$idsEquipaje as $idEquipaje) { if (isset($equipajes[$idEquipaje])) { $nombres[] = $equipajes[$idEquipaje]['nombre_tipo']; } } ?>
+                    <?php if (empty($nombres)) continue; ?>
                     <li>
-                        <?= htmlspecialchars($equipajes[$idEquipaje]['nombre_tipo'], ENT_QUOTES, 'UTF-8') ?>
-                        +$<?= number_format((float)$equipajes[$idEquipaje]['precio_unitario'], 2, ',', '.') ?>
+                        <strong>P#<?= (int)$pasajero ?>:</strong> <?= htmlspecialchars(implode(', ', $nombres), ENT_QUOTES, 'UTF-8') ?>
                     </li>
                 <?php endforeach; ?>
             </ul>

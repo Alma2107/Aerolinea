@@ -1,5 +1,6 @@
 ﻿<?php
 require_once '../../config/conexion.php';
+require_once 'flujo_helpers.php';
 session_start();
 
 $pageStyles = ['../../css/proceso_compra/asientos.css'];
@@ -12,9 +13,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
     $_SESSION['id_asiento'] = $_POST['id_asiento'] ?? null;
 }
 
-$idsVuelos = $_SESSION['id_vuelo'] ?? [];
-$idsVuelos = is_array($idsVuelos) ? array_map('intval', $idsVuelos) : [(int)$idsVuelos];
-$idsVuelos = array_values(array_filter($idsVuelos));
+$idsVuelos = normalizarIdsVuelos($_SESSION['id_vuelo'] ?? []);
 $idVueloReferencia = $idsVuelos[0] ?? 0;
 
 $columnasAsientos = $pdo->query("SHOW COLUMNS FROM asientos_avion")->fetchAll(PDO::FETCH_COLUMN);
